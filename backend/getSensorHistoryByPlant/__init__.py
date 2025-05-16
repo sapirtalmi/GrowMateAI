@@ -2,6 +2,7 @@ from ..shared.utils import get_db_collections, get_user_id_from_token
 import azure.functions as func
 import logging
 import json
+from bson import ObjectId
 
 collections = get_db_collections()
 sensor_collection = collections["SensorReading"]
@@ -17,6 +18,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     token = auth_header.split(" ")[1]
     try:
         user_id = get_user_id_from_token(token)
+        user_object_id = ObjectId(user_id)
     except Exception as e:
         return func.HttpResponse(str(e), status_code=401)
 
@@ -26,7 +28,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not plant_name:
             return func.HttpResponse("Missing 'plantName' in request body", status_code=400)
 
-        user_entry = user_plants_collection.find_one({"userID": user_id})
+        user_entry = user_plants_collection.find_one({"userID": user_object_id})
         if not user_entry:
             return func.HttpResponse("User has no plants", status_code=404)
 

@@ -2,6 +2,7 @@ from ..shared.utils import get_db_collections
 import azure.functions as func
 import logging
 import json
+from bson import ObjectId
 
 collections = get_db_collections()
 sensor_collection = collections["SensorReading"]
