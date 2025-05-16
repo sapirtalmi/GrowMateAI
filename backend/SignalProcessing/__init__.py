@@ -1,17 +1,17 @@
+from ..getSensorHistory import collection
+from ..shared.utils import get_db_collections
 import azure.functions as func
 import logging
-from pymongo import MongoClient
+import json
 from datetime import datetime
-import os
 
-# Use Azure App Setting for Cosmos DB connection
-COSMOS_CONNECTION_STRING = os.environ["COSMOS_CONNECTION_STRING"]
-client = MongoClient(COSMOS_CONNECTION_STRING)
-db = client["SmartGardenDB"]
-collection = db["SensorReading"]
+collections = get_db_collections()
+users_collection = collections["users"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('SignalProcessing function triggered.')
+    logging.info("SignalProcessing function triggered.")
+    if collection is None:
+        return func.HttpResponse("Database unavailable", status_code=500)
 
     try:
         req_body = req.get_json()
@@ -24,25 +24,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         }
 
         existing_entry = collection.find_one({"sensorID": sensor_id})
-
         if existing_entry:
-            collection.update_one(
-                {"sensorID": sensor_id},
-                {"$push": {"data": current_data}}
-            )
-            logging.info(f"Updated existing entry for sensorID: {sensor_id}")
+            collection.update_one({"sensorID": sensor_id}, {"$push": {"data": current_data}})
         else:
-            new_entry = {
-                "sensorID": sensor_id,
-                "data": [current_data]
-            }
-            collection.insert_one(new_entry)
-            logging.info(f"Created new entry for sensorID: {sensor_id}")
+            collection.insert_one({"sensorID": sensor_id, "data": [current_data]})
 
         return func.HttpResponse("Data processed successfully.", status_code=200)
 
-    except ValueError:
-        return func.HttpResponse("Invalid JSON data.", status_code=400)
     except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
-        return func.HttpResponse("An error occurred while processing the data.", status_code=500)
+        logging.error(f"Error in SignalProcessing: {str(e)}")
+        return func.HttpResponse("Processing error", status_code=500)

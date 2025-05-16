@@ -1,6 +1,7 @@
-# Do not include azure-functions-worker in this file
-# The Python Worker is managed by the Azure Functions platform
-# Manually managing azure-functions-worker may cause unexpected issues
-
-azure-functions
-pymongo
+azure-functions==1.23.0
+bcrypt==4.3.0
+dnspython==2.7.0
+MarkupSafe==3.0.2
+PyJWT==2.10.1
+pymongo==4.13.0
+Werkzeug==3.1.3

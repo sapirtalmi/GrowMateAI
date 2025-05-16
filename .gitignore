@@ -1,0 +1,62 @@
+# macOS system files
+.DS_Store
+
+# IDE settings
+.idea/
+.vscode/
+
+# Python environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Local Python packages
+.python_packages/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Azure Functions artifacts
+local.settings.json
+host.json
+.funcignore
+__blobstorage__
+__queuestorage__
+__azurite_db*__.json
+
+# Node.js
+node_modules/
+dist/
+
+# .NET / C# artifacts (if used in any backend tooling)
+bin/
+obj/
+csx/
+.vs/
+edge/
+Publish/
+*.user
+*.suo
+*.cscfg
+*.Cache
+project.lock.json
+/packages/
+TestResults/
+tools/NuGet.exe
+
+# App data and secrets
+App_Data/
+.secrets/
+data/
+secrets/
+appsettings.json
+
+# Other
+*.log
+*.tmp
