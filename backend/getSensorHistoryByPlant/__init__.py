@@ -1,11 +1,11 @@
+from ..shared.utils import get_db_collections, get_user_id_from_token
 import azure.functions as func
 import logging
 import json
-from ..shared.utils import get_db_collections, get_user_id_from_token
 
 collections = get_db_collections()
-sensor_collection = collections["sensor_data"]
-user_plants_collection = collections["user_plants"]
+sensor_collection = collections["SensorReading"]
+user_plants_collection = collections["UserPlants"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("getSensorHistoryByPlant triggered")

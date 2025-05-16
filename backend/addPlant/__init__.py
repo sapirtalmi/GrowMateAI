@@ -1,11 +1,12 @@
 from ..shared.utils import get_user_id_from_token, get_db_collections
+from bson import ObjectId
 import azure.functions as func
 import logging
 import json
 
 
 collections = get_db_collections()
-user_plants_collection = collections["user_plants"]
+user_plants_collection = collections["UserPlants"]
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -17,7 +18,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     token = auth_header.split(" ")[1]
     try:
-        user_id = get_user_id_from_token(token)
+        user_id = ObjectId(get_user_id_from_token(token))  
     except Exception as e:
         return func.HttpResponse(str(e), status_code=401)
 

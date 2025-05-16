@@ -4,7 +4,7 @@ import logging
 import json
 
 collections = get_db_collections()
-user_plants_collection = collections["user_plants"]
+user_plants_collection = collections["UserPlants"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("getUserPlants function triggered")

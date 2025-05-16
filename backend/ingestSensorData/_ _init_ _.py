@@ -1,15 +1,13 @@
+from ..shared.utils import get_db_collections
 import logging
 import azure.functions as func
 import json
 import os
 from pymongo import MongoClient
 
-# MongoDB connection setup
-COSMOS_URI = os.environ["COSMOS_CONNECTION_STRING"]
-client = MongoClient(COSMOS_URI)
-db = client["SmartGardenDB"]
-history_collection = db["SensorReadings"]       # stores all data points
-status_collection = db["DeviceStatus"]          # stores latest only
+collections = get_db_collections()
+history_collection = collections["SensorReadings"]
+status_collection = collections["DeviceStatus"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:

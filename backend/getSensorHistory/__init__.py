@@ -1,12 +1,11 @@
+from ..shared.utils import get_db_collections
 import azure.functions as func
 import pymongo
 import json
 import os
 
-COSMOS_URI = os.environ["COSMOS_CONNECTION_STRING"]
-client = pymongo.MongoClient(COSMOS_URI)
-db = client["SmartGardenDB"]
-collection = db["SensorReadings"]
+collections = get_db_collections()
+sensor_collection = collections["SensorReadings"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     device_id = req.params.get("deviceId")

@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 
 collections = get_db_collections()
-users_collection = collections["users"]
+users_collection = collections["Users"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("SignalProcessing function triggered.")

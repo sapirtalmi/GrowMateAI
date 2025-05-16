@@ -34,10 +34,12 @@ def get_db_collections():
         client = MongoClient(conn_str, tlsAllowInvalidCertificates=True)
         db = client['SmartGardenDB']
         return {
-            "sensor_data": db['SensorReading'],
-            "users": db['users'],
-            "user_plants": db['userPlants']
-        }
+        "SensorReading": db['SensorReading'],
+        "Users": db['Users'],
+        "UserPlants": db['UserPlants'],
+        "SensorReadings": db['SensorReadings'],       
+        "DeviceStatus": db['DeviceStatus']            
+    }
     except Exception as e:
         logging.error(f"MongoDB connection failed: {e}")
         raise

@@ -1,10 +1,10 @@
+from ..shared.utils import get_db_collections
 import azure.functions as func
 import logging
 import json
-from ..shared.utils import get_db_collections
 
 collections = get_db_collections()
-sensor_collection = collections["sensor_data"]
+sensor_collection = collections["SensorReading"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("getSensorHistoryByDeviceID function triggered")
