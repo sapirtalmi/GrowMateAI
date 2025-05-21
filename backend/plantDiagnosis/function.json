@@ -6,8 +6,8 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": ["get", "post"],
-      "route": "http_trigger"
+      "methods": ["post"],
+      "route": "plantDiagnosis"
     },
     {
       "type": "http",
