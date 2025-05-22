@@ -2,11 +2,9 @@ from ..shared.utils import get_db_collections
 import logging
 import azure.functions as func
 import json
-import os
-from pymongo import MongoClient
 
 collections = get_db_collections()
-history_collection = collections["SensorReadings"]
+sensor_collection = collections["SensorReading"]
 status_collection = collections["DeviceStatus"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -14,19 +12,36 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         data = req.get_json()
         logging.info(f"Received sensor data: {data}")
 
-        # Insert into history
-        history_collection.insert_one(data)
-        logging.info("Inserted into SensorReadings")
+        sensor_id = data.get("sensorID")
+        if not sensor_id:
+            return func.HttpResponse("Missing sensorID in data", status_code=400)
 
-        # Update latest status
+        # Add reading to historical data array
+        sensor_collection.update_one(
+            { "sensorID": sensor_id },
+            {
+                "$push": {
+                    "data": {
+                        "timestamp": data.get("timestamp"),
+                        "moisture": data.get("moisture"),
+                        "temperature": data.get("temperature"),
+                        "humidity": data.get("humidity")
+                    }
+                }
+            },
+            upsert=True
+        )
+        logging.info("Appended reading to SensorReading")
+
+        # Update latest device status
         status_collection.update_one(
-            { "deviceId": data["deviceId"] },  # match by device
-            { "$set": data },                  # update with latest reading
-            upsert=True                        # create if not exists
+            { "deviceId": data["deviceId"] },
+            { "$set": data },
+            upsert=True
         )
         logging.info("Updated DeviceStatus")
 
-        return func.HttpResponse("Data stored and status updated", status_code=200)
+        return func.HttpResponse("Data ingested and stored", status_code=200)
 
     except Exception as e:
         logging.error(f"Error: {e}")
