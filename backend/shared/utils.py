@@ -16,6 +16,7 @@ def get_user_id_from_token(token: str) -> str:
         raise ValueError(f"Invalid token: {str(e)}")
 
 
+
 def generate_jwt(payload: dict) -> str:
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
     if not JWT_SECRET_KEY:
@@ -38,7 +39,10 @@ def get_db_collections():
         "Users": db['Users'],
         "UserPlants": db['UserPlants'],
         "SensorReadings": db['SensorReadings'],       
-        "DeviceStatus": db['DeviceStatus']            
+        "DeviceStatus": db['DeviceStatus'],
+        "CommunityPosts": db['CommunityPosts'],
+        "CommunityComments": db['CommunityComments']
+
     }
     except Exception as e:
         logging.error(f"MongoDB connection failed: {e}")
