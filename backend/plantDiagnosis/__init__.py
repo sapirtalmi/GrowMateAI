@@ -86,4 +86,5 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         print(e)
         logging.error(f"Error in plantDiagnosis: {str(e)}")
+        return func.HttpResponse("Internal server error", status_code=500)
 
