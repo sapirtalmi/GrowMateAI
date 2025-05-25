@@ -1,7 +1,9 @@
 from ..shared.utils import get_db_collections, get_user_id_from_token
 import azure.functions as func
 import json
+import logging
 from bson import ObjectId
+from bson.errors import InvalidId
 
 collections = get_db_collections()
 post_collection = collections["CommunityPosts"]
@@ -14,12 +16,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         token = auth.split(" ")[1]
         user_id = get_user_id_from_token(token)
-        user_object_id = ObjectId(user_id)
+        
+        try:
+
+            user_object_id = ObjectId(user_id)
+        except InvalidId:
+            logging.error(f"Invalid ObjectId: {user_id}")
+            return func.HttpResponse("Invalid user ID format", status_code=400)
 
         posts_cursor = post_collection.find({
             "$or": [
                 {"visibility": "public"},
-                {"userID": user_object_id}
+                { "userID": user_object_id }
             ]
         }).sort("timestamp", -1)
 
@@ -32,4 +40,5 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(json.dumps(posts), mimetype="application/json")
 
     except Exception as e:
+        logging.error(f"Error retrieving posts: {e}")
         return func.HttpResponse("Error retrieving posts", status_code=500)
