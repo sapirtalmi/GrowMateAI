@@ -47,12 +47,16 @@ export default function App() {
         placeholder="Username"
         onChangeText={setUsername}
         autoCapitalize="none"
+        placeholderTextColor="#9FE2BF"
+
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry
         onChangeText={setPassword}
+        placeholderTextColor="#9FE2BF"
+
       />
     {isLoading ? (<ActivityIndicator size="large" color="#0000ff" />) : (<Button title="Login" onPress={handleLogin} />
     )}
