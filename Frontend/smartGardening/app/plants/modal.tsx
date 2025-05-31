@@ -107,6 +107,8 @@ export default function AddPlantModal() {
         placeholder="Plant name"
         value={name}
         onChangeText={setName}
+        placeholderTextColor="#9FE2BF"
+
       />
 
       <TextInput
@@ -114,6 +116,8 @@ export default function AddPlantModal() {
         placeholder="Device ID"
         value={deviceID}
         onChangeText={setDeviceId}
+        placeholderTextColor="#9FE2BF"
+
       />
 
       <TextInput
@@ -121,6 +125,7 @@ export default function AddPlantModal() {
         placeholder="Plant Type (e.g., Herb, Tree)"
         value={plantType}
         onChangeText={setPlantType}
+        placeholderTextColor="#9FE2BF"
       />
 
       <Button title="Choose from Gallery" onPress={pickFromGallery} />
