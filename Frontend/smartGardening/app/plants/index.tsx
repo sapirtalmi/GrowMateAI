@@ -60,7 +60,7 @@ export default function PlantListScreen() {
         if (!token) throw new Error('No token found');
 
         const response = await axios.get(
-          'https://smartgardeningfunctions.azurewebsites.net/api/getUserPlants',
+          'https://smart-gardening-functions.azurewebsites.net/api/getuserplants',
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -76,7 +76,7 @@ export default function PlantListScreen() {
           plantsFromAPI.map(async (plant: Plant) => {
             try {
               const sensorRes = await axios.post(
-                'https://smartgardeningfunctions.azurewebsites.net/api/getSensorHistoryByDeviceID',
+                'https://smart-gardening-functions.azurewebsites.net/api/getsensorhistorybydeviceid',
                 {
                   sensorID: plant.sensorID,
                 },
@@ -129,7 +129,7 @@ export default function PlantListScreen() {
       const base64Image = await encodeImageToBase64(imageUri);
 
       const response = await axios.post(
-        'https://smartgardeningfunctions.azurewebsites.net/api/plantdiagnosis',
+        'https://smart-gardening-functions.azurewebsites.net/api/plantdiagnosis',
         {
           plantType: selectedPlant.plant_type,
           complaint: problemText,
@@ -165,9 +165,14 @@ export default function PlantListScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>🪴 My Plants</Text>
-        <Pressable onPress={() => router.push('/plants/modal')}>
-          <Text style={styles.newPlant}>New Plant</Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <Pressable onPress={() => router.push('/plants/modal')}>
+            <Text style={styles.newPlant}>New Plant</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push('plants/plan' as any)}>
+            <Text style={[styles.newPlant, { color: 'green' }]}>Plan My Garden</Text>
+          </Pressable>
+        </View>
       </View>
 
       {loading ? (

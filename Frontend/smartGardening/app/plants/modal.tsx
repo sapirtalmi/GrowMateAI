@@ -65,7 +65,7 @@ export default function AddPlantModal() {
       console.log('Sending plant:', plantData);
 
       const response = await axios.post(
-        'https://smartgardeningfunctions.azurewebsites.net/api/addPlant?', // ← Replace with your actual endpoint
+        'https://smart-gardening-functions.azurewebsites.net/api/addplant', 
         plantData,
         {
           headers: {

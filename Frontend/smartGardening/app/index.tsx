@@ -14,7 +14,7 @@ export default function App() {
     try {
       console.log("starting");
       
-      const response = await axios.post('https://smartgardeningfunctions.azurewebsites.net/api/login', {
+      const response = await axios.post('https://smart-gardening-functions.azurewebsites.net/api/login', {
         username,
         password,
       });
