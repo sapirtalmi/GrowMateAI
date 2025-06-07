@@ -67,19 +67,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
         content = response.choices[0].message.content.strip()
-        logging.info(f"GPT raw response: {content}")  
         # Remove Markdown formatting if present
         if content.startswith("```json"):
             content = content.replace("```json", "").strip()
         if content.endswith("```"):
             content = content[:-3].strip()
 
-        try:
-            parsed = json.loads(content)
-        except json.JSONDecodeError as e:
-            logging.error(f"Failed to parse JSON: {e}")
-            return func.HttpResponse("Invalid response from OpenAI", status_code=502)
-
+        parsed = json.loads(content)
 
         print(parsed)
 
@@ -93,4 +87,3 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         print(e)
         logging.error(f"Error in plantDiagnosis: {str(e)}")
         return func.HttpResponse("Internal server error", status_code=500)
-

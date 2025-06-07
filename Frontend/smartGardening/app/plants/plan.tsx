@@ -72,6 +72,7 @@ export default function PlanYourGardenScreen() {
             key={key}
             style={styles.input}
             placeholder={key}
+            placeholderTextColor="#999" // Set a consistent placeholder color
             value={form[key as keyof typeof form]}
             onChangeText={(text) => handleChange(key, text)}
           />

@@ -69,12 +69,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
         content = response.choices[0].message.content.strip()
+        logging.info(f"GPT raw response: {content}")
+
         if content.startswith("```json"):
             content = content.replace("```json", "").strip()
         if content.endswith("```"):
             content = content[:-3].strip()
 
-        parsed = json.loads(content)
+        try:
+            parsed = json.loads(content)
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse JSON from OpenAI: {e}")
+            return func.HttpResponse("Invalid response from OpenAI", status_code=502)
 
         return func.HttpResponse(
             json.dumps(parsed),
