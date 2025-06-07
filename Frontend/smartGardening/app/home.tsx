@@ -24,7 +24,7 @@ export default function HomeScreen() {
 
 
   const goToPlants = () => {
-    router.push('/plants'); // 👈 Navigate to the plants screen
+    router.push('/plants'); // Navigate to the plants screen
   };
 
   return (
