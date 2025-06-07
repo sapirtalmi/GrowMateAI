@@ -23,6 +23,7 @@ export default function MenuScreen() {
       <MenuButton title="Add Plant" icon="➕" route="/plants/modal" />
       <MenuButton title="Get Sensor Data" icon="📡" route="/sensors" />
       <MenuButton title="Diagnose Plant Problem" icon="🧠" route="/diagnose" />
+      <MenuButton title="Community" icon="🌐" route="/community" />
       <MenuButton title="Settings" icon="⚙️" route="/settings" />
     </View>
   );
