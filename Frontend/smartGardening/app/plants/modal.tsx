@@ -2,8 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+
 
 export default function AddPlantModal() {
   const router = useRouter();
@@ -102,6 +104,11 @@ export default function AddPlantModal() {
     <View style={styles.container}>
       <Text style={styles.title}>🌿Add New Plant</Text>
 
+      <Link href="/menu" style={{ marginBottom: 20 }}>
+        <Text style={{ color: 'blue', fontSize: 16 }}>← menu</Text>
+      </Link>
+
+
       <TextInput
         style={styles.input}
         placeholder="Plant name"
@@ -135,6 +142,7 @@ export default function AddPlantModal() {
       {imageUri && (
         <Image source={{ uri: imageUri }} style={styles.preview} />
       )}
+
 
       <View style={{ marginTop: 20 }}>
         <Button title="Add Plant" onPress={handleAdd} />

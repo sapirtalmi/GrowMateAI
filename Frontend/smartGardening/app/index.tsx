@@ -26,8 +26,8 @@ export default function App() {
       await AsyncStorage.setItem('username', username);
 
   
-      // Navigate to home screen
-      router.replace('/home');
+      // Navigate to menu screen
+      router.replace('/menu');
     } catch (error: any) {
       if (error.response && (error.response.status === 400 || error.response.status === 401)) {
         Alert.alert('Login Failed', 'Invalid username or password.');
