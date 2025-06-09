@@ -56,12 +56,20 @@ useEffect(() => {
       <Text style={styles.postContent}>{item.content.slice(0, 100)}...</Text>
       <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
     </TouchableOpacity>
+    
   );
 
   return (
     
     <View style={styles.container}>
       <Text style={styles.header}>🌐 Community Posts</Text>
+      {/* ➕ New Post Button */}
+      <TouchableOpacity
+        style={styles.newPostButton}
+        onPress={() => router.push('/community/create')}
+      >
+        <Text style={styles.newPostText}>➕ New Post</Text>
+      </TouchableOpacity>
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
@@ -95,6 +103,18 @@ useEffect(() => {
 }
 
 const styles = StyleSheet.create({
+  newPostButton: {
+  alignSelf: 'flex-end',
+  marginBottom: 10,
+  backgroundColor: '#4CAF50',
+  paddingVertical: 6,
+  paddingHorizontal: 12,
+  borderRadius: 6,
+},
+newPostText: {
+  color: '#fff',
+  fontWeight: 'bold',
+},
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   header: { fontSize: 26, fontWeight: 'bold', marginBottom: 16 },
   postCard: {
