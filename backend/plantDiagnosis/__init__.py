@@ -45,8 +45,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         f"Return your response as a JSON object with the following fields:\n"
                         f"- problem: (string) short description of the detected issue, or 'none' if healthy\n"
                         f"- severity: (string) one of: 'low', 'moderate', 'high', or 'none'\n"
-                        f"- suggestions: (list of strings) actionable care tips\n\n"
-                        f"Only return a valid JSON object. Do not include any explanation or extra text."
+                        f"- suggestions: (list of strings) actionable care tips, or an empty list if the plant is healthy\n"
+                        f"Important: If no issue is detected, return: {{\"problem\": \"none\", \"severity\": \"none\", \"suggestions\": []}}\n"
+                        f"Only return the JSON object. Do not include explanation or markdown."
                     )   
 
                 },
