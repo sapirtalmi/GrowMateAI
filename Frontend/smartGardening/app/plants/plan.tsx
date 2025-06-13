@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import Header from '../components/header';
+
 
 export default function PlanYourGardenScreen() {
   const [form, setForm] = useState({
@@ -65,6 +67,7 @@ export default function PlanYourGardenScreen() {
       style={{ flex: 1 }}
     >
       <ScrollView contentContainerStyle={styles.container}>
+        <Header title="Main Menu" />
         <Text style={styles.title}>🌿 Plan Your Garden</Text>
 
         {Object.keys(form).map((key) => (

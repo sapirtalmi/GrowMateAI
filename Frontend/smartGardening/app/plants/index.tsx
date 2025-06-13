@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import Header from '../components/header';
+
 import {
   FlatList,
   StyleSheet,
@@ -83,6 +85,7 @@ export default function PlantListScreen() {
 
   return (
     <View style={styles.container}>
+      <Header title="Main Menu" />
       <Text style={styles.title}>🪴 My Plants</Text>
 
       {plants.length === 0 ? (

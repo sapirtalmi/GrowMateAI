@@ -20,10 +20,12 @@ export default function App() {
       });
       console.log("here");
       const token = response.data.token; // or however the backend sends it
+      const user_id = response.data.user_id; // Make sure your backend sends user_id in the response
   
       // Optional: Save the token for future requests
       await AsyncStorage.setItem('authToken', token);
       await AsyncStorage.setItem('username', username);
+      await AsyncStorage.setItem('userID', user_id);
 
   
       // Navigate to menu screen
@@ -41,6 +43,12 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <Text style={{ textAlign: 'center', marginTop: 15 }}>
+      Don't have an account?{' '}
+      <Text style={{ color: 'blue' }} onPress={() => router.push('/register')}>
+        Register here
+      </Text>
+    </Text>
       <Text style={styles.title}>Sign In</Text>
       <TextInput
         style={styles.input}

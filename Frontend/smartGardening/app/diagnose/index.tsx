@@ -4,6 +4,8 @@ import * as FileSystem from 'expo-file-system';
 import { useState } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Header from '../components/header';
+
 
 export default function DiagnoseScreen() {
   const [title, setTitle] = useState('');
@@ -12,6 +14,8 @@ export default function DiagnoseScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [visibility, setVisibility] = useState('private');
+
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ base64: false });
@@ -72,7 +76,7 @@ export default function DiagnoseScreen() {
           title,
           plantName,
           content: `${content}\n\n🧠 Diagnosis:\n${diagnosisText}`,
-          visibility: 'private',
+          visibility,
         },
         {
           headers: {
@@ -98,6 +102,7 @@ export default function DiagnoseScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
+        <Header title="Main Menu" />
         <Text style={styles.title}>🧠 Diagnose Plant</Text>
 
         <Text style={styles.label}>🪴 Title</Text>
@@ -112,6 +117,14 @@ export default function DiagnoseScreen() {
           value={content}
           onChangeText={setContent}
           multiline
+        />
+
+        <Text style={styles.label}>🌐 Visibility (public/private)</Text>
+        <TextInput
+          style={styles.input}
+          value={visibility}
+          onChangeText={setVisibility}
+          placeholder="private"
         />
 
         <Text style={styles.label}>📸 Plant Image</Text>

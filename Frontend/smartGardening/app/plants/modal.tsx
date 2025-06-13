@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import Header from '../components/header';
+
 
 
 export default function AddPlantModal() {
@@ -102,6 +104,7 @@ export default function AddPlantModal() {
 
   return (
     <View style={styles.container}>
+      <Header title="Main Menu" />
       <Text style={styles.title}>🌿Add New Plant</Text>
 
       <Link href="/menu" style={{ marginBottom: 20 }}>
