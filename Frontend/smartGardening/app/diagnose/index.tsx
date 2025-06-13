@@ -1,11 +1,26 @@
-import { View, Text, StyleSheet, TextInput, Button, Image, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Keyboard,
+  Image,
+  Alert,
+  ActivityIndicator,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import { useState } from 'react';
+import Header from '../components/header';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
-import { useState } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Header from '../components/header';
-
+import {
+  Text,
+  TextInput,
+  Button,
+  useTheme,
+  IconButton,
+} from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function DiagnoseScreen() {
   const [title, setTitle] = useState('');
@@ -15,7 +30,7 @@ export default function DiagnoseScreen() {
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [visibility, setVisibility] = useState('private');
-
+  const theme = useTheme();
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ base64: false });
@@ -35,65 +50,54 @@ export default function DiagnoseScreen() {
     try {
       setLoading(true);
       setDiagnosis(null);
-
       const token = await AsyncStorage.getItem('authToken');
       if (!token) throw new Error('Missing token');
-
-      if (!image) {
-        Alert.alert('Error', 'Please upload or take a photo.');
-        return;
-      }
+      if (!image) return Alert.alert('Upload required', 'Please upload or take a photo.');
 
       const base64Img = await FileSystem.readAsStringAsync(image, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      // Step 1: Diagnose
-      const diagnosisRes = await axios.post(
+      const res = await axios.post(
         'https://smart-gardening-functions.azurewebsites.net/api/plantdiagnosis',
-        { plantType: plantName,      
-          complaint: content,         
-          imageBase64: base64Img,  },
+        {
+          plantType: plantName,
+          complaint: content,
+          imageBase64: base64Img,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
           },
         }
       );
 
-      const result = diagnosisRes.data;
-      const diagnosisText = result.problem === 'none'
-      ? '🪴 Your plant looks healthy!'
-      : `Problem: ${result.problem}\nSeverity: ${result.severity}\nSuggestions:\n- ${result.suggestions.join('\n- ')}`;
+      const result = res.data;
+      const diagnosisText =
+        result.problem === 'none'
+          ? 'Your plant looks healthy!'
+          : `Problem: ${result.problem}\nSeverity: ${result.severity}\nSuggestions:\n- ${result.suggestions.join('\n- ')}`;
+      setDiagnosis(diagnosisText);
 
-    setDiagnosis(diagnosisText);
-
-      // Step 2: Create Private Post
       await axios.post(
         'https://smart-gardening-functions.azurewebsites.net/api/createCommunityPost',
         {
           title,
           plantName,
-          content: `${content}\n\n🧠 Diagnosis:\n${diagnosisText}`,
+          content: `${content}\n\nDiagnosis:\n${diagnosisText}`,
           visibility,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      Alert.alert('Success', 'Diagnosis completed and private post created!');
+      Alert.alert('Success', 'Diagnosis completed and post created!');
       setTitle('');
       setPlantName('');
       setContent('');
       setImage(null);
     } catch (err: any) {
-      console.error('Error during diagnosis/post', err.response?.data || err.message);
-      Alert.alert('Error', 'Something went wrong. Please check the console.');
+      console.error('Error:', err.response?.data || err.message);
+      Alert.alert('Error', 'Something went wrong.');
     } finally {
       setLoading(false);
     }
@@ -103,40 +107,47 @@ export default function DiagnoseScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <Header title="Main Menu" />
-        <Text style={styles.title}>🧠 Diagnose Plant</Text>
-
-        <Text style={styles.label}>🪴 Title</Text>
-        <TextInput style={styles.input} value={title} onChangeText={setTitle} />
-
-        <Text style={styles.label}>🌿 Plant Name</Text>
-        <TextInput style={styles.input} value={plantName} onChangeText={setPlantName} />
-
-        <Text style={styles.label}>📝 Description</Text>
-        <TextInput
-          style={[styles.input, { height: 80 }]}
-          value={content}
-          onChangeText={setContent}
-          multiline
-        />
-
-        <Text style={styles.label}>🌐 Visibility (public/private)</Text>
-        <TextInput
-          style={styles.input}
-          value={visibility}
-          onChangeText={setVisibility}
-          placeholder="private"
-        />
-
-        <Text style={styles.label}>📸 Plant Image</Text>
-        {image && <Image source={{ uri: image }} style={styles.image} />}
-        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
-          <Button title="Upload Photo" onPress={pickImage} />
-          <Button title="Take Photo" onPress={takePhoto} />
+        <View style={styles.row}>
+          <Icon name="brain" size={24} color={theme.colors.primary} />
+          <Text variant="titleLarge" style={styles.title}> Diagnose Plant</Text>
         </View>
 
-        <Button title="Run Diagnosis & Create Private Post" onPress={diagnoseAndPost} />
-        {loading && <ActivityIndicator style={{ marginTop: 10 }} />}
-        {diagnosis && <Text style={styles.diagnosis}>🧠 Diagnosis: {diagnosis}</Text>}
+        <TextInput label="Title" value={title} onChangeText={setTitle} mode="outlined" style={styles.input} />
+        <TextInput label="Plant Name" value={plantName} onChangeText={setPlantName} mode="outlined" style={styles.input} />
+        <TextInput label="Description" value={content} onChangeText={setContent} multiline mode="outlined" style={styles.input} />
+        <TextInput label="Visibility" value={visibility} onChangeText={setVisibility} mode="outlined" style={styles.input} />
+
+        <View style={styles.row}>
+          <Icon name="camera-image" size={22} color={theme.colors.primary} />
+          <Text style={styles.label}> Plant Image</Text>
+        </View>
+
+        {image && <Image source={{ uri: image }} style={styles.image} />}
+
+        <View style={styles.buttonRow}>
+          <Button icon="image" mode="outlined" onPress={pickImage} style={styles.button}>
+            Upload
+          </Button>
+          <Button icon="camera" mode="outlined" onPress={takePhoto} style={styles.button}>
+            Camera
+          </Button>
+        </View>
+
+        <Button
+          icon="leaf"
+          mode="contained"
+          onPress={diagnoseAndPost}
+          disabled={loading}
+        >
+          Run Diagnosis
+        </Button>
+
+        {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
+        {diagnosis && (
+          <Text style={styles.diagnosis}>
+            <Icon name="check-circle-outline" size={18} /> {diagnosis}
+          </Text>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -144,15 +155,12 @@ export default function DiagnoseScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
-  label: { marginTop: 10, fontWeight: '600' },
-  input: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 8,
-    marginTop: 5,
-  },
-  image: { width: '100%', height: 200, resizeMode: 'cover', marginTop: 10, marginBottom: 10 },
-  diagnosis: { marginTop: 20, fontSize: 16, color: 'green' },
+  title: { marginBottom: 16 },
+  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  label: { fontWeight: '600', fontSize: 15 },
+  input: { marginBottom: 10 },
+  image: { width: '100%', height: 200, marginTop: 10, borderRadius: 10 },
+  diagnosis: { marginTop: 20, fontSize: 16, color: 'green', fontStyle: 'italic' },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 },
+  button: { flex: 1, marginHorizontal: 4 },
 });

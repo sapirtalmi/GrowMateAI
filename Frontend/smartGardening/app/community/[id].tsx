@@ -1,10 +1,22 @@
 import { useLocalSearchParams } from 'expo-router';
-import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
+import {
+  Text,
+  TextInput,
+  Button,
+  ActivityIndicator,
+  useTheme,
+  IconButton,
+} from 'react-native-paper';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/header';
-
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type Comment = {
   content: string;
@@ -25,6 +37,7 @@ type Post = {
 
 export default function CommunityPostDetails() {
   const { id } = useLocalSearchParams();
+  const theme = useTheme();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +48,6 @@ export default function CommunityPostDetails() {
 
   useEffect(() => {
     if (!id) return;
-
     const fetchPost = async () => {
       try {
         const res = await axios.get(
@@ -48,18 +60,12 @@ export default function CommunityPostDetails() {
         setLoading(false);
       }
     };
-
     fetchPost();
   }, [id]);
 
   const fetchComments = async () => {
-    const rawId = id;
-    const postId = Array.isArray(rawId) ? rawId[0] : rawId;
-
-    if (!postId || typeof postId !== "string") {
-      console.warn("❌ Invalid post ID:", rawId);
-      return;
-    }
+    const postId = Array.isArray(id) ? id[0] : id;
+    if (!postId || typeof postId !== "string") return;
 
     try {
       setCommentsLoading(true);
@@ -69,7 +75,7 @@ export default function CommunityPostDetails() {
       setComments(res.data);
       setShowComments(true);
     } catch (err) {
-      console.error("❌ Failed to fetch comments", err);
+      console.error("Failed to fetch comments", err);
     } finally {
       setCommentsLoading(false);
     }
@@ -78,7 +84,6 @@ export default function CommunityPostDetails() {
   const submitComment = async () => {
     const postId = Array.isArray(id) ? id[0] : id;
     if (!newComment.trim() || !postId) return;
-
     try {
       setSubmitting(true);
       const token = await AsyncStorage.getItem('authToken');
@@ -88,10 +93,9 @@ export default function CommunityPostDetails() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setNewComment('');
-      fetchComments(); // Refresh comments
+      fetchComments();
     } catch (err) {
-      console.error("❌ Failed to post comment", err);
-      Alert.alert("Error", "Couldn't submit comment.");
+      console.error("Submit comment failed", err);
     } finally {
       setSubmitting(false);
     }
@@ -100,7 +104,7 @@ export default function CommunityPostDetails() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="green" />
+        <ActivityIndicator />
       </View>
     );
   }
@@ -114,66 +118,79 @@ export default function CommunityPostDetails() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Header title="Main Menu" />
-      <Text style={styles.title}>🪴 {post.title}</Text>
-      <Text style={styles.plant}>🌿 {post.plantName}</Text>
+      <Text variant="titleLarge">{post.title}</Text>
+      <Text style={styles.plantName}>
+        <Icon name="leaf" size={16} /> {post.plantName}
+      </Text>
+      <Text style={styles.timestamp}>
+        <Icon name="calendar" size={16} /> {new Date(post.timestamp).toLocaleString()}
+      </Text>
       <Text style={styles.content}>{post.content}</Text>
-      <Text style={styles.timestamp}>📅 {new Date(post.timestamp).toLocaleString()}</Text>
 
-      <Button title="View Comments" onPress={fetchComments} />
+      <Button
+        icon="comment-text"
+        mode="outlined"
+        onPress={fetchComments}
+        style={{ marginTop: 10 }}
+      >
+        View Comments
+      </Button>
 
-      {commentsLoading && <ActivityIndicator size="small" color="gray" style={{ marginTop: 10 }} />}
-
-      {showComments && comments.length > 0 && (
-        <View style={{ marginTop: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>🗨️ Comments:</Text>
-          {comments.map((c, i) => (
-            <View key={i} style={{ marginTop: 10 }}>
-              <Text>{c.content}</Text>
-              <Text style={{ fontSize: 12, color: '#777' }}>{new Date(c.timestamp).toLocaleString()}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {showComments && !commentsLoading && comments.length === 0 && (
-        <Text style={{ marginTop: 10 }}>No comments yet.</Text>
-      )}
+      {commentsLoading && <ActivityIndicator style={{ marginTop: 10 }} />}
 
       {showComments && (
-        <View style={{ marginTop: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>💬 Add a Comment:</Text>
+        <>
+          {comments.length > 0 ? (
+            <View style={{ marginTop: 20 }}>
+              {comments.map((c, i) => (
+                <View key={i} style={styles.comment}>
+                  <Text>{c.content}</Text>
+                  <Text style={styles.commentTime}>{new Date(c.timestamp).toLocaleString()}</Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={{ marginTop: 10, color: '#888' }}>No comments yet.</Text>
+          )}
+
           <TextInput
-            placeholder="Write your comment..."
-            style={styles.commentInput}
+            label="Add a comment"
             value={newComment}
             onChangeText={setNewComment}
+            mode="outlined"
+            style={{ marginTop: 20 }}
           />
           <Button
-            title={submitting ? "Submitting..." : "Submit Comment"}
+            mode="contained"
+            icon="send"
             onPress={submitComment}
             disabled={submitting || !newComment.trim()}
-          />
-        </View>
+            style={{ marginTop: 10 }}
+          >
+            Submit
+          </Button>
+        </>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
-  plant: { fontSize: 16, fontStyle: 'italic', marginBottom: 10, color: 'green' },
-  content: { fontSize: 16, marginBottom: 10 },
-  timestamp: { fontSize: 14, color: '#666', marginBottom: 20 },
-  commentInput: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    padding: 8,
-    borderRadius: 6,
-    marginTop: 10,
-    marginBottom: 10,
+  plantName: { marginTop: 6, fontStyle: 'italic', color: 'green' },
+  timestamp: { color: '#888', marginBottom: 10 },
+  content: { fontSize: 16, marginBottom: 20 },
+  comment: {
+    paddingVertical: 8,
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
+  },
+  commentTime: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 4,
   },
 });

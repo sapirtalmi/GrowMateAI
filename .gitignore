@@ -1,7 +1,7 @@
 # --- project-specific -------------------------------------------------
-#backend/chatGPT/
-#backend/DB/
-#backend/ESP32/
+backend/chatGPT/
+backend/DB/
+backend/ESP32/
 
 # macOS system files
 .DS_Store
