@@ -14,6 +14,8 @@ export default function DiagnoseScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [visibility, setVisibility] = useState('private');
+
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ base64: false });
@@ -74,7 +76,7 @@ export default function DiagnoseScreen() {
           title,
           plantName,
           content: `${content}\n\n🧠 Diagnosis:\n${diagnosisText}`,
-          visibility: 'private',
+          visibility,
         },
         {
           headers: {
@@ -115,6 +117,14 @@ export default function DiagnoseScreen() {
           value={content}
           onChangeText={setContent}
           multiline
+        />
+
+        <Text style={styles.label}>🌐 Visibility (public/private)</Text>
+        <TextInput
+          style={styles.input}
+          value={visibility}
+          onChangeText={setVisibility}
+          placeholder="private"
         />
 
         <Text style={styles.label}>📸 Plant Image</Text>
