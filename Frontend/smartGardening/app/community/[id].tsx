@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert } f
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Header from '../components/header';
+
 
 type Comment = {
   content: string;
@@ -113,6 +115,7 @@ export default function CommunityPostDetails() {
 
   return (
     <View style={styles.container}>
+      <Header title="Main Menu" />
       <Text style={styles.title}>🪴 {post.title}</Text>
       <Text style={styles.plant}>🌿 {post.plantName}</Text>
       <Text style={styles.content}>{post.content}</Text>

@@ -2,6 +2,11 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect } from 'react';
+import Header from './components/header'; 
+
+
+
+
 
 export default function MenuScreen() {
   const router = useRouter();
@@ -15,7 +20,9 @@ export default function MenuScreen() {
   );
 
   return (
+    
     <View style={styles.container}>
+      <Header title="Main Menu" />
       <Text style={styles.title}>🌱 Garden Menu</Text>
 
       <MenuButton title="Plan Your Garden" icon="🛠️" route="/plants/plan" />

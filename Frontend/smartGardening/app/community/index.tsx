@@ -3,8 +3,11 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator }
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
+import Header from '../components/header';
+
 
 type Post = {
+  username: string | null;
   _id: string;
   title: string;
   content: string;
@@ -22,24 +25,35 @@ export default function CommunityScreen() {
 
 useEffect(() => {
   const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('authToken');
-      const headers = filter === 'mine' ? { Authorization: `Bearer ${token}` } : {};
+  try {
+    setLoading(true);
+    const token = await AsyncStorage.getItem('authToken');
+    const username = await AsyncStorage.getItem('username'); // or userID if you store it
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const res = await axios.get(
-        'https://smart-gardening-functions.azurewebsites.net/api/getCommunityPosts',
-        { headers }
-      );
+    const res = await axios.get(
+      'https://smart-gardening-functions.azurewebsites.net/api/getCommunityPosts',
+      { headers }
+    );
 
-      setPosts(res.data || []);
-    } catch (err) {
-      console.error('Failed to fetch posts', err);
-      setPosts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const allPosts: Post[] = res.data || [];
+
+    // Filter based on selected tab
+    const userId = await AsyncStorage.getItem('userID');
+    const filtered = filter === 'mine'
+      ? allPosts.filter((p) => p.userID === userId)
+      : allPosts.filter((p) => p.visibility === 'public');
+
+
+
+    setPosts(filtered);
+  } catch (err) {
+    console.error('Failed to fetch posts', err);
+    setPosts([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   fetchPosts();
 }, [filter]);
@@ -62,6 +76,7 @@ useEffect(() => {
   return (
     
     <View style={styles.container}>
+      <Header title="Main Menu" />
       <Text style={styles.header}>🌐 Community Posts</Text>
       {/* ➕ New Post Button */}
       <TouchableOpacity

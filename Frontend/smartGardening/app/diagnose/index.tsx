@@ -4,6 +4,8 @@ import * as FileSystem from 'expo-file-system';
 import { useState } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Header from '../components/header';
+
 
 export default function DiagnoseScreen() {
   const [title, setTitle] = useState('');
@@ -98,6 +100,7 @@ export default function DiagnoseScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
+        <Header title="Main Menu" />
         <Text style={styles.title}>🧠 Diagnose Plant</Text>
 
         <Text style={styles.label}>🪴 Title</Text>

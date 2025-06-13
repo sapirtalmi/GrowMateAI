@@ -3,6 +3,8 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import Header from '../components/header';
+
 
 export default function CreatePost() {
   const [title, setTitle] = useState('');
@@ -32,6 +34,8 @@ export default function CreatePost() {
 
   return (
     <View style={styles.container}>
+      <Header title="Main Menu" />
+      
       <Text style={styles.label}>🪴 Title</Text>
       <TextInput style={styles.input} value={title} onChangeText={setTitle} />
 

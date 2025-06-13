@@ -45,10 +45,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         token = generate_jwt(payload)
 
         return func.HttpResponse(
-            json.dumps({"token": token}),
+            json.dumps({
+                "token": token,
+                "user_id": str(user["_id"])
+            }),
             status_code=200,
             mimetype="application/json"
         )
+
     except Exception as e:
         logging.error(f"Login error: {e}")
         return func.HttpResponse("Internal server error", status_code=500)
