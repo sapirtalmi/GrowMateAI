@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, FlatList } from 'react-native';
+import {
+  Text,
+  Card,
+  Chip,
+  ActivityIndicator,
+  FAB,
+  useTheme,
+} from 'react-native-paper';
 import Header from '../components/header';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import axios from 'axios';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type Post = {
   username: string | null;
@@ -22,143 +30,135 @@ export default function CommunityScreen() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
   const router = useRouter();
+  const theme = useTheme();
 
-useEffect(() => {
-  const fetchPosts = async () => {
-  try {
-    setLoading(true);
-    const token = await AsyncStorage.getItem('authToken');
-    const username = await AsyncStorage.getItem('username'); // or userID if you store it
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const token = await AsyncStorage.getItem('authToken');
+        const userID = await AsyncStorage.getItem('userID');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    const res = await axios.get(
-      'https://smart-gardening-functions.azurewebsites.net/api/getCommunityPosts',
-      { headers }
-    );
+        const res = await axios.get(
+          'https://smart-gardening-functions.azurewebsites.net/api/getCommunityPosts',
+          { headers }
+        );
 
-    const allPosts: Post[] = res.data || [];
+        const allPosts: Post[] = res.data || [];
 
-    // Filter based on selected tab
-    const userId = await AsyncStorage.getItem('userID');
-    const filtered = filter === 'mine'
-      ? allPosts.filter((p) => p.userID === userId)
-      : allPosts.filter((p) => p.visibility === 'public');
+        const filtered = filter === 'mine'
+          ? allPosts.filter((p) => p.userID === userID)
+          : allPosts.filter((p) => p.visibility === 'public');
 
+        setPosts(filtered);
+      } catch (err) {
+        console.error('Failed to fetch posts', err);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-
-    setPosts(filtered);
-  } catch (err) {
-    console.error('Failed to fetch posts', err);
-    setPosts([]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  fetchPosts();
-}, [filter]);
-
-
+    fetchPosts();
+  }, [filter]);
 
   const renderPost = ({ item }: { item: Post }) => (
-    <TouchableOpacity
-      style={styles.postCard}
-      onPress={() => router.push({ pathname: '/community/[id]', params: { id: item._id } })}
+    <Card
+      style={styles.card}
+      onPress={() =>
+        router.push({ pathname: '/community/[id]', params: { id: item._id } })
+      }
     >
-      <Text style={styles.postTitle}>🪴 {item.title}</Text>
-      <Text style={styles.plantName}>🌿 {item.plantName}</Text>
-      <Text style={styles.postContent}>{item.content.slice(0, 100)}...</Text>
-      <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
-    </TouchableOpacity>
-    
+      <Card.Title
+        title={item.title}
+        subtitle={`Plant: ${item.plantName}`}
+        left={(props) => <Icon name="sprout" size={24} color={theme.colors.primary} />}
+      />
+      <Card.Content>
+        <Text variant="bodyMedium">
+          {item.content.slice(0, 100)}...
+        </Text>
+        <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
+      </Card.Content>
+    </Card>
   );
 
   return (
-    
     <View style={styles.container}>
       <Header title="Main Menu" />
-      <Text style={styles.header}>🌐 Community Posts</Text>
-      {/* ➕ New Post Button */}
-      <TouchableOpacity
-        style={styles.newPostButton}
-        onPress={() => router.push('/community/create')}
-      >
-        <Text style={styles.newPostText}>➕ New Post</Text>
-      </TouchableOpacity>
-      {loading ? (
-        <ActivityIndicator size="large" color="#4CAF50" />
-      ) : (
-        <>
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity
-              style={[styles.toggleButton, filter === 'all' && styles.activeButton]}
-              onPress={() => setFilter('all')}
-            >
-              <Text style={styles.toggleText}>🌍 Public</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.toggleButton, filter === 'mine' && styles.activeButton]}
-              onPress={() => setFilter('mine')}
-            >
-              <Text style={styles.toggleText}>🙋 My Posts</Text>
-            </TouchableOpacity>
-          </View>
+      <Text variant="titleLarge" style={styles.title}>
+        <Icon name="account-group-outline" size={22} /> Community Posts
+      </Text>
 
-          <FlatList
-            data={posts}
-            keyExtractor={(item) => item._id}
-            renderItem={renderPost}
-            contentContainerStyle={{ paddingBottom: 30 }}
-          />
-        </>
+      {/* Toggle Filter Chips */}
+      <View style={styles.chipRow}>
+        <Chip
+          icon="earth"
+          selected={filter === 'all'}
+          onPress={() => setFilter('all')}
+          style={styles.chip}
+        >
+          Public
+        </Chip>
+        <Chip
+          icon="account"
+          selected={filter === 'mine'}
+          onPress={() => setFilter('mine')}
+          style={styles.chip}
+        >
+          My Posts
+        </Chip>
+      </View>
+
+      {loading ? (
+        <ActivityIndicator style={{ marginTop: 20 }} />
+      ) : (
+        <FlatList
+          data={posts}
+          keyExtractor={(item) => item._id}
+          renderItem={renderPost}
+          contentContainerStyle={{ paddingBottom: 80 }}
+        />
       )}
 
+      {/* FAB: New Post */}
+      <FAB
+        icon="plus"
+        label="New Post"
+        onPress={() => router.push('/community/create')}
+        style={styles.fab}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  newPostButton: {
-  alignSelf: 'flex-end',
-  marginBottom: 10,
-  backgroundColor: '#4CAF50',
-  paddingVertical: 6,
-  paddingHorizontal: 12,
-  borderRadius: 6,
-},
-newPostText: {
-  color: '#fff',
-  fontWeight: 'bold',
-},
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  header: { fontSize: 26, fontWeight: 'bold', marginBottom: 16 },
-  postCard: {
-    backgroundColor: '#e8f5e9',
-    padding: 14,
-    borderRadius: 10,
+  container: { flex: 1, backgroundColor: '#fff', padding: 16 },
+  title: { marginBottom: 16, fontWeight: 'bold' },
+  chipRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginBottom: 12,
+    gap: 12,
   },
-  postTitle: { fontSize: 18, fontWeight: '600', marginBottom: 4 },
-  plantName: { fontSize: 14, fontStyle: 'italic', marginBottom: 4, color: '#388e3c' },
-  postContent: { fontSize: 14, color: '#333' },
-  timestamp: { fontSize: 12, color: '#999', marginTop: 6 },
-  toggleContainer: {
-  flexDirection: 'row',
-  justifyContent: 'space-evenly',
-  marginBottom: 12,
-},
-toggleButton: {
-  paddingVertical: 6,
-  paddingHorizontal: 16,
-  borderRadius: 20,
-  backgroundColor: '#ccc',
-},
-activeButton: {
-  backgroundColor: '#4CAF50',
-},
-toggleText: {
-  color: '#fff',
-  fontWeight: 'bold',
-}
-
+  chip: {
+    marginHorizontal: 4,
+    backgroundColor: '#e0f5e9',
+  },
+  card: {
+    marginBottom: 12,
+    backgroundColor: '#f1f8f4',
+  },
+  timestamp: {
+    fontSize: 12,
+    marginTop: 8,
+    color: '#888',
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    backgroundColor: '#e0f5e9',
+  },
 });

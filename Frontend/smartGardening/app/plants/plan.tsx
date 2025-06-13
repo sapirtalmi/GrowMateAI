@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
-  TextInput,
   ScrollView,
-  Button,
-  StyleSheet,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from 'react-native';
+import {
+  TextInput,
+  Button,
+  Text,
+  ActivityIndicator,
+  useTheme,
+  Divider,
+  IconButton,
+} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Header from '../components/header';
-
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function PlanYourGardenScreen() {
   const [form, setForm] = useState({
@@ -30,6 +35,7 @@ export default function PlanYourGardenScreen() {
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const theme = useTheme();
 
   const handleChange = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -68,37 +74,56 @@ export default function PlanYourGardenScreen() {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Header title="Main Menu" />
-        <Text style={styles.title}>🌿 Plan Your Garden</Text>
+        <View style={styles.iconHeader}>
+          <Icon name="sprout" size={32} color={theme.colors.primary} />
+          <Text variant="headlineMedium" style={styles.title}>
+            Plan Your Garden
+          </Text>
+        </View>
 
         {Object.keys(form).map((key) => (
           <TextInput
             key={key}
-            style={styles.input}
-            placeholder={key}
-            placeholderTextColor="#999" // Set a consistent placeholder color
+            label={key.replace(/([A-Z])/g, ' $1')}
             value={form[key as keyof typeof form]}
             onChangeText={(text) => handleChange(key, text)}
+            mode="outlined"
+            style={styles.input}
           />
         ))}
 
-        <Button title="Generate Plan" onPress={handleSubmit} />
-        {loading && <ActivityIndicator size="large" style={{ marginTop: 20 }} />}
+        {loading ? (
+          <ActivityIndicator animating={true} size="large" />
+        ) : (
+          <Button mode="contained" onPress={handleSubmit}>
+            Generate Plan
+          </Button>
+        )}
 
         {result && (
           <View style={styles.result}>
-            <Text style={styles.sectionTitle}>✅ Recommended Plants</Text>
+            <Divider style={{ marginVertical: 20 }} />
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              <Icon name="leaf" size={20} /> Recommended Plants
+            </Text>
             {result.plants?.map((plant: any, index: number) => (
               <View key={index} style={styles.plantBox}>
-                <Text>🌱 {plant.name} ({plant.type})</Text>
-                <Text>Soil: {plant.soil}</Text>
-                <Text>Watering: {plant.watering}</Text>
-                <Text>Sun: {plant.sunlightNeeds}</Text>
-                <Text>Maintenance: {plant.maintenance}</Text>
+                <Text>
+                  <Icon name="flower" /> {plant.name} ({plant.type})
+                </Text>
+                <Text>🪵 Soil: {plant.soil}</Text>
+                <Text>💧 Watering: {plant.watering}</Text>
+                <Text>☀️ Sun: {plant.sunlightNeeds}</Text>
+                <Text>🧰 Maintenance: {plant.maintenance}</Text>
               </View>
             ))}
-            <Text style={styles.sectionTitle}>💡 Tips</Text>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              <Icon name="lightbulb-on-outline" /> Tips
+            </Text>
             {result.additionalTips?.map((tip: string, i: number) => (
-              <Text key={i}>👉 {tip}</Text>
+              <Text key={i} style={{ marginBottom: 4 }}>
+                <Icon name="check-circle-outline" /> {tip}
+              </Text>
             ))}
           </View>
         )}
@@ -110,31 +135,30 @@ export default function PlanYourGardenScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#f6fff6',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  iconHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginBottom: 20,
   },
+  title: {
+    fontWeight: 'bold',
+  },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 12,
-    marginBottom: 10,
-    borderRadius: 6,
+    marginBottom: 12,
   },
   result: {
     marginTop: 30,
   },
   sectionTitle: {
-    fontSize: 18,
+    marginBottom: 10,
     fontWeight: '600',
-    marginTop: 10,
   },
   plantBox: {
-    padding: 10,
-    marginVertical: 5,
+    padding: 12,
+    marginBottom: 10,
     backgroundColor: '#e0ffe0',
     borderRadius: 8,
   },

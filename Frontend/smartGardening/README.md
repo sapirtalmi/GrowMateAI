@@ -1,50 +1,45 @@
-# Welcome to your Expo app 👋
+# 🌿 GrowMateAI – Expo App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Welcome to your [Expo](https://expo.dev) project, created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app). This mobile app is built with React Native, powered by modern libraries for a professional look and feel.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Get Started
+
+1. **Install dependencies**
 
    ```bash
    npm install
-   ```
+2. **start the app**
 
-2. Start the app
-
-   ```bash
    npx expo start
-   ```
+   
+   Then choose your preferred environment:
 
-In the output, you'll find options to open the app in a
+   ✅ Development Build
+   📱 Android Emulator
+   🍎 iOS Simulator
+   🧪 Expo Go
+   You can start building features inside the app/ directory. This project uses file-based routing with expo-router.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+3. **Reset for a Fresh Start**
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+   To reset the project and start fresh:
 
-## Get a fresh project
+      npm run reset-project
 
-When you're ready, run:
+   This moves the starter code to app-example/ and creates a clean app/ folder to begin building your custom app.
 
-```bash
-npm run reset-project
-```
+4. **UI Libraries Used (GrowMateAI Stack)**
+   This project uses:
+   react-native-paper – Pre-built Material Design UI components
+   react-native-vector-icons – Scalable icon support
+   
+   run:
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+      npx expo install react-native-paper react-native-vector-icons
+      npx expo install react-native-paper rreact-native-paper
+      npx expo start --clear
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.

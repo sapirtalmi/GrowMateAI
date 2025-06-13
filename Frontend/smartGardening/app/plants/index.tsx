@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import Header from '../components/header';
-
 import {
   FlatList,
   StyleSheet,
-  Text,
   View,
-  ActivityIndicator,
 } from 'react-native';
-
+import {
+  ActivityIndicator,
+  Card,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type Plant = {
   name: string;
@@ -21,7 +24,8 @@ type Plant = {
 export default function PlantListScreen() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [sensorDataMap, setSensorDataMap] = useState<{ [sensorID: string]: any }>({});
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchPlants = async () => {
@@ -31,9 +35,7 @@ export default function PlantListScreen() {
 
         const response = await axios.get(
           'https://smart-gardening-functions.azurewebsites.net/api/getuserplants',
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         const plantsFromAPI = response.data.plants || [];
@@ -42,7 +44,7 @@ export default function PlantListScreen() {
         const sensorResults: { [sensorID: string]: any } = {};
 
         await Promise.all(
-            plantsFromAPI.map(async (plant: Plant) => {
+          plantsFromAPI.map(async (plant: Plant) => {
             try {
               const res = await axios.post(
                 'https://smart-gardening-functions.azurewebsites.net/api/getsensorhistorybydeviceid',
@@ -54,12 +56,9 @@ export default function PlantListScreen() {
                   },
                 }
               );
-
               const readings = res.data.data;
-              if (readings && readings.length > 0) {
-                readings.sort(
-                  (a: any, b: any) => new Date(b.Date).getTime() - new Date(a.Date).getTime()
-                );
+              if (readings?.length > 0) {
+                readings.sort((a: any, b: any) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
                 sensorResults[plant.sensorID] = readings[0];
               }
             } catch {
@@ -80,40 +79,61 @@ export default function PlantListScreen() {
   }, []);
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 50 }} />;
+    return (
+      <ActivityIndicator
+        animating={true}
+        size="large"
+        style={{ marginTop: 50 }}
+        color={theme.colors.primary}
+      />
+    );
   }
 
   return (
     <View style={styles.container}>
       <Header title="Main Menu" />
-      <Text style={styles.title}>🪴 My Plants</Text>
+      <Text variant="headlineMedium" style={styles.title}>
+        <Icon name="sprout" size={26} /> My Plants
+      </Text>
 
       {plants.length === 0 ? (
         <Text style={styles.empty}>No plants found.</Text>
       ) : (
         <FlatList
           data={plants}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => (
-            <View style={styles.plantItem}>
-              <Text style={styles.plantName}>🌱 {item.name}</Text>
-              <Text style={styles.deviceId}>🔌 {item.sensorID}</Text>
-              <Text style={styles.deviceId}>🌿 Type: {item.plant_type}</Text>
+            <Card style={styles.card} mode="contained">
+              <Card.Title
+                title={item.name}
+                subtitle={`Sensor: ${item.sensorID}`}
+                left={() => (
+                  <View style={styles.iconLeft}>
+                    <Icon name="leaf" size={28} color={theme.colors.primary} />
+                  </View>
+                )}
+              />
+              <Card.Content>
+                <Text style={styles.label}>Type: {item.plant_type}</Text>
 
-              {sensorDataMap[item.sensorID] && (
-                <View style={{ marginTop: 8 }}>
-                  <Text>
-                    🌡 Temp: {sensorDataMap[item.sensorID].Temperature}°C
-                  </Text>
-                  <Text>
-                    💧 Humidity: {sensorDataMap[item.sensorID].Humidity}%
-                  </Text>
-                  <Text>
-                    🪴 Soil: {sensorDataMap[item.sensorID].SoilMoisture}
-                  </Text>
-                </View>
-              )}
-            </View>
+                {sensorDataMap[item.sensorID] && (
+                  <View style={{ marginTop: 10 }}>
+                    <View style={styles.row}>
+                      <Icon name="thermometer" size={20} color="#555" />
+                      <Text> Temp: {sensorDataMap[item.sensorID].Temperature}°C</Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Icon name="water-percent" size={20} color="#555" />
+                      <Text> Humidity: {sensorDataMap[item.sensorID].Humidity}%</Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Icon name="water" size={20} color="#555" />
+                      <Text> Soil: {sensorDataMap[item.sensorID].SoilMoisture}</Text>
+                    </View>
+                  </View>
+                )}
+              </Card.Content>
+            </Card>
           )}
         />
       )}
@@ -122,15 +142,20 @@ export default function PlantListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  empty: { fontSize: 16, textAlign: 'center', marginTop: 40, color: '#888' },
-  plantItem: {
-    backgroundColor: '#e0ffe0',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
+  container: { flex: 1, padding: 20, backgroundColor: '#f6fff6' },
+  title: { marginBottom: 20, textAlign: 'center' },
+  empty: { textAlign: 'center', marginTop: 40, color: '#888' },
+  card: { marginBottom: 12, backgroundColor: '#e0ffe0' },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 2,
   },
-  plantName: { fontSize: 18, fontWeight: 'bold' },
-  deviceId: { fontSize: 14, color: '#555' },
+  label: {
+    marginBottom: 4,
+    color: '#333',
+  },
+  iconLeft: {
+    marginRight: 10,
+  },
 });

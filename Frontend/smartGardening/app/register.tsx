@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import axios from 'axios';
+import { View, StyleSheet, Alert } from 'react-native';
+import {
+  Text,
+  TextInput,
+  Button,
+  ActivityIndicator,
+  useTheme,
+} from 'react-native-paper';
 import { useRouter } from 'expo-router';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const theme = useTheme();
 
   const handleRegister = async () => {
     if (!username || !password) {
@@ -17,19 +25,24 @@ export default function RegisterScreen() {
 
     setIsLoading(true);
     try {
-      const res = await axios.post('https://smart-gardening-functions.azurewebsites.net/api/register', {
-        username,
-        password,
+      const res = await fetch('https://smart-gardening-functions.azurewebsites.net/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
       });
 
-      Alert.alert('Success', 'Account created successfully! You can now log in.');
-      router.replace('/');
-    } catch (err: any) {
-      if (err.response?.status === 409) {
+      if (res.status === 409) {
         Alert.alert('Registration Failed', 'Username already exists.');
-      } else {
-        Alert.alert('Error', 'Could not register. Please try again.');
+        return;
       }
+
+      if (!res.ok) throw new Error('Unexpected error');
+
+      Alert.alert('Success', 'Account created! You can now log in.');
+      router.replace('/');
+    } catch (err) {
+      console.error('Register error:', err);
+      Alert.alert('Error', 'Could not register. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -37,28 +50,35 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
+      <Icon name="account-plus" size={42} color={theme.colors.primary} style={{ marginBottom: 10 }} />
+      <Text variant="headlineSmall" style={styles.title}>
+        Create Account
+      </Text>
 
       <TextInput
-        style={styles.input}
-        placeholder="Username"
+        label="Username"
+        value={username}
         onChangeText={setUsername}
+        mode="outlined"
         autoCapitalize="none"
-        placeholderTextColor="#9FE2BF"
+        style={styles.input}
       />
 
       <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
+        label="Password"
+        value={password}
         onChangeText={setPassword}
-        placeholderTextColor="#9FE2BF"
+        mode="outlined"
+        secureTextEntry
+        style={styles.input}
       />
 
       {isLoading ? (
-        <ActivityIndicator size="large" />
+        <ActivityIndicator style={{ marginTop: 20 }} />
       ) : (
-        <Button title="Register" onPress={handleRegister} />
+        <Button mode="contained" onPress={handleRegister} style={{ marginTop: 20 }}>
+          Register
+        </Button>
       )}
     </View>
   );
@@ -66,12 +86,6 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 28, marginBottom: 20, textAlign: 'center' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 15,
-    borderRadius: 5,
-  },
+  title: { textAlign: 'center', marginBottom: 20 },
+  input: { marginBottom: 12 },
 });
