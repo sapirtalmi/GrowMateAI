@@ -7,10 +7,9 @@ from datetime import datetime
 
 collections = get_db_collections()
 post_collection = collections["CommunityPosts"]
+user_collection = collections["Users"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("createCommunityPost triggered")
-
     auth = req.headers.get("Authorization")
     if not auth or not auth.startswith("Bearer "):
         return func.HttpResponse("Missing token", status_code=401)
@@ -39,6 +38,32 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         }
 
         post_collection.insert_one(post)
+
+        user = user_collection.find_one({"_id": user_object_id})
+        new_badges = []
+
+        if user.get("postsCount", 0) == 0:
+            new_badges.append("First Post")
+        elif user.get("postsCount", 0) + 1 == 10:
+            new_badges.append("Active Poster")
+
+        user_collection.update_one(
+            {"_id": user_object_id},
+            {
+                "$inc": {"postsCount": 1},
+                "$addToSet": {"badges": {"$each": new_badges}}
+            }
+        )
+
+        # Update user stats
+        user_collection.update_one(
+            {"_id": user_object_id},
+            {
+                "$inc": {"postsCount": 1},
+                "$addToSet": {"badges": "First Post"}
+            }
+        )
+
         return func.HttpResponse("Post created", status_code=201)
 
     except Exception as e:

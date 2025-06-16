@@ -24,11 +24,26 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         salt = bcrypt.gensalt()
         hashed_pw = bcrypt.hashpw(password.encode("utf-8"), salt)
 
-        # Create user document
+        # Define allowed profile types
+        allowed_profiles = ["amateur", "enthusiast", "professional", "nursery_owner"]
+        # Get profile type from request, default to "amateur"
+        profile_type = req_body.get("profileType", "amateur")
+        if profile_type not in allowed_profiles:
+            profile_type = "amateur"  # default fallback
+
+
+        # Create user document with initial profile
         user_doc = {
             "username": username,
             "hashed_password": hashed_pw,
+            "profileType": profile_type,
+            "reputationScore": 0,
+            "postsCount": 0,
+            "commentsCount": 0,
+            "votesReceived": 0,
+            "badges": ["Early Adopter"]
         }
+
 
         result = users_collection.insert_one(user_doc)
 

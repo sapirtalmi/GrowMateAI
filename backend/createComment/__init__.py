@@ -4,24 +4,22 @@ import json
 from bson import ObjectId
 from datetime import datetime
 import logging
+from bson.errors import InvalidId
 
 collections = get_db_collections()
 comment_collection = collections["CommunityComments"]
+user_collection = collections["Users"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("createComment function triggered")
-
     auth_header = req.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return func.HttpResponse("Missing or invalid Authorization header", status_code=401)
 
-    token = auth_header.split(" ")[1]
     try:
+        token = auth_header.split(" ")[1]
         user_id = get_user_id_from_token(token)
-        logging.info(f"Decoded user ID: {user_id}")
         user_object_id = ObjectId(user_id)
     except Exception as e:
-        logging.error(f"Token validation or ObjectId conversion failed: {e}")
         return func.HttpResponse(f"Unauthorized: {str(e)}", status_code=401)
 
     try:
@@ -29,7 +27,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         post_id = body.get("postID")
         content = body.get("content")
     except Exception as e:
-        logging.error(f"Invalid JSON body: {e}")
         return func.HttpResponse("Invalid JSON body", status_code=400)
 
     if not post_id or not content:
@@ -44,9 +41,33 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         }
 
         comment_collection.insert_one(comment)
-        logging.info(f"Comment added to post {post_id} by user {user_id}")
+
+        user = user_collection.find_one({"_id": user_object_id})
+        new_badges = []
+
+        if user.get("commentsCount", 0) == 0:
+            new_badges.append("First Comment")
+        elif user.get("commentsCount", 0) + 1 == 20:
+            new_badges.append("Community Helper")
+
+        user_collection.update_one(
+            {"_id": user_object_id},
+            {
+                "$inc": {"commentsCount": 1},
+                "$addToSet": {"badges": {"$each": new_badges}}
+            }
+        )
+
+        # Update user stats
+        user_collection.update_one(
+            {"_id": user_object_id},
+            {
+                "$inc": {"commentsCount": 1},
+                "$addToSet": {"badges": "First Comment"}
+            }
+        )
+
         return func.HttpResponse("Comment added", status_code=201)
 
     except Exception as e:
-        logging.error(f"Error inserting comment: {e}")
         return func.HttpResponse("Error adding comment", status_code=500)
