@@ -23,6 +23,10 @@ type Post = {
   userID: string;
   visibility: string;
   timestamp: string;
+  profileType?: string;
+  badges?: string[];
+  upvotes?: number;
+  downvotes?: number;
 };
 
 export default function CommunityScreen() {
@@ -73,12 +77,40 @@ export default function CommunityScreen() {
       <Card.Title
         title={item.title}
         subtitle={`Plant: ${item.plantName}`}
-        left={(props) => <Icon name="sprout" size={24} color={theme.colors.primary} />}
+        left={() => (
+          <Icon
+            name="sprout"
+            size={24}
+            color={theme.colors.primary}
+            style={{ marginRight: 10 }}
+          />
+        )}
       />
       <Card.Content>
         <Text variant="bodyMedium">
-          {item.content.slice(0, 100)}...
+          {item.content.length > 100 ? item.content.slice(0, 100) + '...' : item.content}
         </Text>
+
+        <View style={styles.userInfo}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+            <Icon name="account-circle" size={16} color={theme.colors.primary} />
+            <Text style={{ marginLeft: 6 }}>
+              {item.username || 'Unknown'} ({item.profileType})
+            </Text>
+          </View>
+
+          {item.badges?.length ? (
+            <Text>🎖 {item.badges.join(', ')}</Text>
+          ) : null}
+
+          <View style={styles.votes}>
+            <Icon name="thumb-up" size={16} color="green" />
+            <Text style={styles.voteText}>{item.upvotes || 0}</Text>
+            <Icon name="thumb-down" size={16} color="red" style={{ marginLeft: 12 }} />
+            <Text style={styles.voteText}>{item.downvotes || 0}</Text>
+          </View>
+        </View>
+
         <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
       </Card.Content>
     </Card>
@@ -91,7 +123,6 @@ export default function CommunityScreen() {
         <Icon name="account-group-outline" size={22} /> Community Posts
       </Text>
 
-      {/* Toggle Filter Chips */}
       <View style={styles.chipRow}>
         <Chip
           icon="earth"
@@ -122,7 +153,6 @@ export default function CommunityScreen() {
         />
       )}
 
-      {/* FAB: New Post */}
       <FAB
         icon="plus"
         label="New Post"
@@ -154,6 +184,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 8,
     color: '#888',
+  },
+  userInfo: {
+    marginTop: 8,
+  },
+  badges: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#666',
+  },
+  votes: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  voteText: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: '#444',
   },
   fab: {
     position: 'absolute',

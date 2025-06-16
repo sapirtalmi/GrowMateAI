@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Card, Text, useTheme } from 'react-native-paper';
+import { Card, Text } from 'react-native-paper';
 import Header from './components/header';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -15,8 +15,8 @@ const menuItems = [
   { title: 'Get Sensor Data', icon: 'access-point', route: '/sensor' },
   { title: 'Diagnose Plant Problem', icon: 'brain', route: '/diagnose' },
   { title: 'Community', icon: 'account-group', route: '/community' },
-  { title: 'Settings', icon: 'cog', route: '/settings' },
-];
+  { title: 'Profile', icon: 'account', route: '/profile' },
+  { title: 'Weather Forecast', icon: 'weather-sunny', route: '/weather' },];
 
 
 export default function MenuScreen() {
