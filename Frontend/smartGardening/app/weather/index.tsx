@@ -106,9 +106,11 @@ export default function WeatherForecastScreen() {
                   style={styles.icon}
                 />
               ) : (
-                <Icon name="weather-partly-cloudy" size={32} color={theme.colors.primary} />
+                <Icon name="weather-cloudy" size={32} color={theme.colors.primary} />
               )
             }
+
+
 
           />
           <Card.Content>
