@@ -42,7 +42,8 @@ def get_db_collections():
         "DeviceStatus": db['DeviceStatus'],
         "CommunityPosts": db['CommunityPosts'],
         "CommunityComments": db['CommunityComments'],
-        "Votes": db['Votes']
+        "Votes": db['Votes'],
+        "FutureGardens": db['FutureGardens'],
 
     }
     except Exception as e:
