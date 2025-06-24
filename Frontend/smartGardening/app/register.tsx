@@ -13,22 +13,27 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [acceptEmailNotifications, setAcceptEmailNotifications] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const theme = useTheme();
 
   const handleRegister = async () => {
-    if (!username || !password) {
-      Alert.alert('Validation Error', 'Username and password are required.');
+    if (!username || !password || !email) {
+      Alert.alert('Validation Error', 'Username, password, and email are required.');
       return;
     }
-
+    if (!acceptEmailNotifications) {
+      Alert.alert('Consent Required', 'You must accept receiving notifications via email.');
+      return;
+    }
     setIsLoading(true);
     try {
-      const res = await fetch('https://smart-gardening-functions.azurewebsites.net/api/register', {
+      const res = await fetch('https://smartgardeningfunctions.azurewebsites.net/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, email, acceptEmailNotifications }),
       });
 
       if (res.status === 409) {
@@ -72,6 +77,29 @@ export default function RegisterScreen() {
         secureTextEntry
         style={styles.input}
       />
+
+      <TextInput
+        label="Email Address"
+        value={email}
+        onChangeText={setEmail}
+        mode="outlined"
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={styles.input}
+      />
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+        <Icon
+          name={acceptEmailNotifications ? 'checkbox-marked' : 'checkbox-blank-outline'}
+          size={28}
+          color={acceptEmailNotifications ? theme.colors.primary : '#888'}
+          onPress={() => setAcceptEmailNotifications(!acceptEmailNotifications)}
+          style={{ marginRight: 8 }}
+        />
+        <Text style={{ flex: 1 }} onPress={() => setAcceptEmailNotifications(!acceptEmailNotifications)}>
+          I accept receiving notifications regarding my plants and garden via email
+        </Text>
+      </View>
 
       {isLoading ? (
         <ActivityIndicator style={{ marginTop: 20 }} />

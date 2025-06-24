@@ -12,9 +12,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         req_body = req.get_json()
         username = req_body.get("username")
         password = req_body.get("password")
+        email = req_body.get("email")
+        accept_email_notifications = req_body.get("acceptEmailNotifications")
 
-        if not username or not password:
-            return func.HttpResponse("Missing username or password", status_code=400)
+        if not username or not password or not email:
+            return func.HttpResponse("Missing username, password, or email", status_code=400)
 
         # Check if user already exists
         if users_collection.find_one({"username": username}):
@@ -28,6 +30,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         user_doc = {
             "username": username,
             "hashed_password": hashed_pw,
+            "email": email,
+            "acceptEmailNotifications": bool(accept_email_notifications),
         }
 
         result = users_collection.insert_one(user_doc)

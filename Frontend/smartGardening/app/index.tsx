@@ -23,7 +23,7 @@ export default function App() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        'https://smart-gardening-functions.azurewebsites.net/api/login',
+        'https://smartgardeningfunctions.azurewebsites.net/api/login',
         { username, password }
       );
 
