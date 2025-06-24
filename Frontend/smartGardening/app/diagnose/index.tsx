@@ -21,10 +21,15 @@ import {
   IconButton,
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useLocalSearchParams } from 'expo-router';
 
 export default function DiagnoseScreen() {
+  const params = useLocalSearchParams();
   const [title, setTitle] = useState('');
-  const [plantName, setPlantName] = useState('');
+  const [plantName, setPlantName] = useState(() => {
+    // Prefill from query param if available
+    return typeof params.prefillPlantName === 'string' ? params.prefillPlantName : '';
+  });
   const [content, setContent] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
