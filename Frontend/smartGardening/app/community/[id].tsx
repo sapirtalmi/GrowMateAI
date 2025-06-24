@@ -3,6 +3,7 @@ import {
   View,
   StyleSheet,
   ScrollView,
+  Alert,
 } from 'react-native';
 import {
   Text,
@@ -24,6 +25,11 @@ type Comment = {
   userID: string;
   postID: string;
   _id: string;
+  username?: string;
+  profileType?: string;
+  badges?: string[];
+  upvotes?: number;
+  downvotes?: number;
 };
 
 type Post = {
@@ -33,6 +39,11 @@ type Post = {
   timestamp: string;
   userID: string;
   _id: string;
+  username?: string;
+  profileType?: string;
+  badges?: string[];
+  upvotes?: number;
+  downvotes?: number;
 };
 
 export default function CommunityPostDetails() {
@@ -101,6 +112,32 @@ export default function CommunityPostDetails() {
     }
   };
 
+  const voteOnContent = async (contentID: string, vote: 'up' | 'down', type: 'post' | 'comment') => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) return;
+
+      await axios.post(
+        'https://smart-gardening-functions.azurewebsites.net/api/votecontent',
+        { contentID, vote, type },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      Alert.alert('Success', 'Vote recorded!');
+      if (type === 'post') {
+        const res = await axios.get(
+          `https://smart-gardening-functions.azurewebsites.net/api/getcommunitypostbyid?id=${id}`
+        );
+        setPost(res.data);
+      } else {
+        fetchComments();
+      }
+    } catch (err) {
+      console.error('Voting failed', err);
+      Alert.alert('Error', 'Could not vote.');
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -127,6 +164,25 @@ export default function CommunityPostDetails() {
       <Text style={styles.timestamp}>
         <Icon name="calendar" size={16} /> {new Date(post.timestamp).toLocaleString()}
       </Text>
+
+      <View style={styles.userInfo}>
+        <Text>👤 {post.username || 'Unknown'} ({post.profileType})</Text>
+        {post.badges?.length ? (
+          <Text>🎖 {post.badges.join(', ')}</Text>
+        ) : null}
+
+        <View style={styles.votes}>
+          <Icon name="thumb-up" size={16} color="green" />
+          <Text style={styles.voteText}>{post.upvotes || 0}</Text>
+          <Icon name="thumb-down" size={16} color="red" style={{ marginLeft: 12 }} />
+          <Text style={styles.voteText}>{post.downvotes || 0}</Text>
+        </View>
+        <View style={styles.voteButtons}>
+          <IconButton icon="thumb-up-outline" onPress={() => voteOnContent(post._id, 'up', 'post')} />
+          <IconButton icon="thumb-down-outline" onPress={() => voteOnContent(post._id, 'down', 'post')} />
+        </View>
+      </View>
+
       <Text style={styles.content}>{post.content}</Text>
 
       <Button
@@ -147,7 +203,24 @@ export default function CommunityPostDetails() {
               {comments.map((c, i) => (
                 <View key={i} style={styles.comment}>
                   <Text>{c.content}</Text>
-                  <Text style={styles.commentTime}>{new Date(c.timestamp).toLocaleString()}</Text>
+                  <Text style={styles.commentTime}>
+                    {new Date(c.timestamp).toLocaleString()}
+                  </Text>
+                  <Text>👤 {c.username || 'Unknown'} ({c.profileType})</Text>
+                  {post.badges?.length ? (
+                    <Text>🎖 {post.badges.join(', ')}</Text>
+                  ) : null}
+
+                  <View style={styles.votes}>
+                    <Icon name="thumb-up" size={14} color="green" />
+                    <Text style={styles.voteText}>{c.upvotes || 0}</Text>
+                    <Icon name="thumb-down" size={14} color="red" style={{ marginLeft: 10 }} />
+                    <Text style={styles.voteText}>{c.downvotes || 0}</Text>
+                  </View>
+                  <View style={styles.voteButtons}>
+                    <IconButton icon="thumb-up-outline" size={18} onPress={() => voteOnContent(c._id, 'up', 'comment')} />
+                    <IconButton icon="thumb-down-outline" size={18} onPress={() => voteOnContent(c._id, 'down', 'comment')} />
+                  </View>
                 </View>
               ))}
             </View>
@@ -183,6 +256,11 @@ const styles = StyleSheet.create({
   plantName: { marginTop: 6, fontStyle: 'italic', color: 'green' },
   timestamp: { color: '#888', marginBottom: 10 },
   content: { fontSize: 16, marginBottom: 20 },
+  userInfo: { marginTop: 12 },
+  badges: { marginTop: 4, fontSize: 12, color: '#666' },
+  votes: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
+  voteText: { marginLeft: 4, fontSize: 14, color: '#444' },
+  voteButtons: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
   comment: {
     paddingVertical: 8,
     borderBottomColor: '#ddd',

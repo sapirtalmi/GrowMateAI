@@ -6,6 +6,7 @@ import {
   Button,
   ActivityIndicator,
   useTheme,
+  RadioButton,
 } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -15,6 +16,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [acceptEmailNotifications, setAcceptEmailNotifications] = useState(false);
+  const [profileType, setProfileType] = useState('amateur'); // default
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const theme = useTheme();
@@ -33,7 +35,7 @@ export default function RegisterScreen() {
       const res = await fetch('https://smartgardeningfunctions.azurewebsites.net/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, email, acceptEmailNotifications }),
+        body: JSON.stringify({ username, password, email, profileType, acceptEmailNotifications }),
       });
 
       if (res.status === 409) {
@@ -77,7 +79,6 @@ export default function RegisterScreen() {
         secureTextEntry
         style={styles.input}
       />
-
       <TextInput
         label="Email Address"
         value={email}
@@ -100,6 +101,21 @@ export default function RegisterScreen() {
           I accept receiving notifications regarding my plants and garden via email
         </Text>
       </View>
+      <Text variant="labelLarge" style={{ marginTop: 10, marginBottom: 6 }}>
+        Select your profile type:
+      </Text>
+
+      <RadioButton.Group
+        onValueChange={value => setProfileType(value)}
+        value={profileType}
+      >
+        {['amateur', 'enthusiast', 'professional', 'nursery_owner'].map(type => (
+          <View key={type} style={styles.radioRow}>
+            <RadioButton value={type} />
+            <Text>{type.replace('_', ' ')}</Text>
+          </View>
+        ))}
+      </RadioButton.Group>
 
       {isLoading ? (
         <ActivityIndicator style={{ marginTop: 20 }} />
@@ -116,4 +132,5 @@ const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff' },
   title: { textAlign: 'center', marginBottom: 20 },
   input: { marginBottom: 12 },
+  radioRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
 });

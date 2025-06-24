@@ -44,6 +44,7 @@ def get_db_collections():
         "CommunityComments": db['CommunityComments'],
         "SensorStock": db['SensorStock'],
         "PlantsData": db['PlantsData'],
+        "Votes": db['Votes']
     }
     except Exception as e:
         logging.error(f"MongoDB connection failed: {e}")
