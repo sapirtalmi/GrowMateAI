@@ -11,7 +11,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     token = req.headers.get("Authorization", "").replace("Bearer ", "")
     try:
         user_id = get_user_id_from_token(token)
-        user_object_id = ObjectId(user_id)
+        user_object_id = ObjectId(user_id)  
     except Exception:
         return func.HttpResponse("Unauthorized", status_code=401)
 
@@ -23,22 +23,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         collections = get_db_collections()
         garden_doc = {
-            "userid": str(user_object_id),
+            "userId": user_object_id,            # store as ObjectId
             "plan": plan,
             "createdAt": datetime.utcnow(),
             "updatedAt": datetime.utcnow()
         }
+
         result = collections["FutureGardens"].insert_one(garden_doc)
+
+        # Serialize for response
         garden_doc["_id"] = str(result.inserted_id)
         garden_doc["userId"] = str(user_object_id)
         garden_doc["createdAt"] = garden_doc["createdAt"].isoformat()
         garden_doc["updatedAt"] = garden_doc["updatedAt"].isoformat()
 
-        return func.HttpResponse(
-            json.dumps(garden_doc),
-            status_code=201,
-            mimetype="application/json"
-        )
+        return func.HttpResponse(json.dumps(garden_doc),
+                                 status_code=201,
+                                 mimetype="application/json")
     except Exception as e:
         logging.error(f"Error saving garden: {e}")
         return func.HttpResponse("Internal server error", status_code=500)
