@@ -1,9 +1,9 @@
 import azure.functions as func
 import logging
 import json
-import uuid
 from datetime import datetime
-from ..shared.utils import get_user_id_from_token, get_db_collections  
+from bson import ObjectId
+from ..shared.utils import get_user_id_from_token, get_db_collections
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("saveFutureGarden triggered")
@@ -11,7 +11,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     token = req.headers.get("Authorization", "").replace("Bearer ", "")
     try:
         user_id = get_user_id_from_token(token)
-    except Exception as e:
+        user_object_id = ObjectId(user_id)
+    except Exception:
         return func.HttpResponse("Unauthorized", status_code=401)
 
     try:
@@ -22,17 +23,22 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         collections = get_db_collections()
         garden_doc = {
-            "_id": str(uuid.uuid4()),
-            "userId": user_id,
+            "userid": str(user_object_id),
             "plan": plan,
             "createdAt": datetime.utcnow(),
             "updatedAt": datetime.utcnow()
         }
-        collections["FutureGardens"].insert_one(garden_doc)
+        result = collections["FutureGardens"].insert_one(garden_doc)
+        garden_doc["_id"] = str(result.inserted_id)
+        garden_doc["userId"] = str(user_object_id)
+        garden_doc["createdAt"] = garden_doc["createdAt"].isoformat()
+        garden_doc["updatedAt"] = garden_doc["updatedAt"].isoformat()
 
-        garden_doc["_id"] = str(garden_doc["_id"])  # stringify ID if needed
-        return func.HttpResponse(json.dumps(garden_doc), status_code=201, mimetype="application/json")
-
+        return func.HttpResponse(
+            json.dumps(garden_doc),
+            status_code=201,
+            mimetype="application/json"
+        )
     except Exception as e:
         logging.error(f"Error saving garden: {e}")
         return func.HttpResponse("Internal server error", status_code=500)

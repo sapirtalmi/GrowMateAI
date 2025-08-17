@@ -1,8 +1,9 @@
 import azure.functions as func
 import logging
 import json
-import uuid
 from datetime import datetime
+from bson import ObjectId
+from bson.errors import InvalidId
 from ..shared.utils import get_user_id_from_token, get_db_collections
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -11,12 +12,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     token = req.headers.get("Authorization", "").replace("Bearer ", "")
     try:
         user_id = get_user_id_from_token(token)
+        user_object_id = ObjectId(user_id)
     except Exception:
         return func.HttpResponse("Unauthorized", status_code=401)
 
     garden_id = req.params.get("id")
     if not garden_id:
         return func.HttpResponse("Missing garden ID", status_code=400)
+
+    try:
+        garden_object_id = ObjectId(garden_id)
+    except InvalidId:
+        return func.HttpResponse("Invalid garden ID format", status_code=400)
 
     try:
         new_plan = req.get_json().get("plan")
@@ -26,12 +33,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         collections = get_db_collections()
         gardens = collections["FutureGardens"]
 
-        result = gardens.find_one({"_id": garden_id})
-        if not result or result["userId"] != user_id:
+        result = gardens.find_one({"_id": garden_object_id})
+        if not result or result["userId"] != user_object_id:
             return func.HttpResponse("Not found or forbidden", status_code=404)
 
         gardens.update_one(
-            {"_id": garden_id},
+            {"_id": garden_object_id},
             {"$set": {"plan": new_plan, "updatedAt": datetime.utcnow()}}
         )
 

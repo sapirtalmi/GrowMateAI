@@ -43,7 +43,7 @@ def get_db_collections():
         "CommunityPosts": db['CommunityPosts'],
         "CommunityComments": db['CommunityComments'],
         "Votes": db['Votes'],
-        "FutureGardens": db['FutureGardens'],
+        "FutureGardens": db['FutureGardens']
 
     }
     except Exception as e:

@@ -2,6 +2,7 @@ import azure.functions as func
 import logging
 import json
 from bson import ObjectId
+from bson.errors import InvalidId
 from ..shared.utils import get_user_id_from_token, get_db_collections
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -14,7 +15,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     token = auth_header.split(" ")[1]
     try:
         user_id = get_user_id_from_token(token)
-    except Exception as e:
+        user_object_id = ObjectId(user_id)
+    except Exception:
         return func.HttpResponse("Unauthorized", status_code=401)
 
     try:
@@ -24,10 +26,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not garden_id:
             return func.HttpResponse("Missing garden ID", status_code=400)
 
+        try:
+            garden_object_id = ObjectId(garden_id)
+        except InvalidId:
+            return func.HttpResponse("Invalid garden ID format", status_code=400)
+
         collections = get_db_collections()
         result = collections["FutureGardens"].delete_one({
-            "_id": ObjectId(garden_id),
-            "userId": user_id
+            "_id": garden_object_id,
+            "userId": user_object_id
         })
 
         if result.deleted_count == 0:
