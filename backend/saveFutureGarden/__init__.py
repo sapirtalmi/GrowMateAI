@@ -1,45 +1,41 @@
+# /saveFutureGarden  POST
 import azure.functions as func
-import logging
-import json
+import json, logging
 from datetime import datetime
 from bson import ObjectId
 from ..shared.utils import get_user_id_from_token, get_db_collections
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("saveFutureGarden triggered")
-
-    token = req.headers.get("Authorization", "").replace("Bearer ", "")
+    token = req.headers.get("Authorization","").replace("Bearer ","")
     try:
-        user_id = get_user_id_from_token(token)
-        user_object_id = ObjectId(user_id)  
+        user_object_id = ObjectId(get_user_id_from_token(token))
     except Exception:
         return func.HttpResponse("Unauthorized", status_code=401)
 
     try:
-        data = req.get_json()
-        plan = data.get("plan")
-        if not plan:
-            return func.HttpResponse("Missing plan data", status_code=400)
+        body = req.get_json()  # expects {criteria, plan, metadata}
+        if not isinstance(body, dict) or "plan" not in body:
+            return func.HttpResponse("Body must include 'plan'", status_code=400)
 
-        collections = get_db_collections()
-        garden_doc = {
-            "userId": user_object_id,            # store as ObjectId
-            "plan": plan,
+        doc = {
+            "userId": user_object_id,
+            "criteria": body.get("criteria", {}),
+            "plan": body["plan"],
+            "metadata": body.get("metadata", {}),
             "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow()
+            "updatedAt": datetime.utcnow(),
         }
 
-        result = collections["FutureGardens"].insert_one(garden_doc)
+        col = get_db_collections()["FutureGardens"]
+        res = col.insert_one(doc)
 
-        # Serialize for response
-        garden_doc["_id"] = str(result.inserted_id)
-        garden_doc["userId"] = str(user_object_id)
-        garden_doc["createdAt"] = garden_doc["createdAt"].isoformat()
-        garden_doc["updatedAt"] = garden_doc["updatedAt"].isoformat()
-
-        return func.HttpResponse(json.dumps(garden_doc),
-                                 status_code=201,
-                                 mimetype="application/json")
+        # serialize
+        doc["_id"] = str(res.inserted_id)
+        doc["userId"] = str(user_object_id)
+        doc["createdAt"] = doc["createdAt"].isoformat()
+        doc["updatedAt"] = doc["updatedAt"].isoformat()
+        return func.HttpResponse(json.dumps(doc), status_code=201, mimetype="application/json")
     except Exception as e:
         logging.error(f"Error saving garden: {e}")
         return func.HttpResponse("Internal server error", status_code=500)

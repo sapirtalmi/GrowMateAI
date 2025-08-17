@@ -1,49 +1,43 @@
+# /futureGardens/{gardenId}  PATCH
 import azure.functions as func
-import logging
-import json
+import json, logging
 from datetime import datetime
 from bson import ObjectId
-from bson.errors import InvalidId
 from ..shared.utils import get_user_id_from_token, get_db_collections
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("editFutureGarden triggered")
+    logging.info("updateFutureGarden triggered")
+    auth = req.headers.get("Authorization","")
+    if not auth.startswith("Bearer "): return func.HttpResponse("Unauthorized", status_code=401)
 
-    token = req.headers.get("Authorization", "").replace("Bearer ", "")
     try:
-        user_id = get_user_id_from_token(token)
-        user_object_id = ObjectId(user_id)
+        user_oid = ObjectId(get_user_id_from_token(auth.split(" ")[1]))
     except Exception:
         return func.HttpResponse("Unauthorized", status_code=401)
 
-    garden_id = req.params.get("id")
-    if not garden_id:
-        return func.HttpResponse("Missing garden ID", status_code=400)
+    garden_id = req.route_params.get("gardenId")
+    try:
+        gid = ObjectId(garden_id)
+    except Exception:
+        return func.HttpResponse("Invalid id", status_code=400)
 
     try:
-        garden_object_id = ObjectId(garden_id)
-    except InvalidId:
-        return func.HttpResponse("Invalid garden ID format", status_code=400)
+        payload = req.get_json()  # e.g. {criteria: {...}} or {plan: {...}} or {metadata: {...}, title: "..."}
+        if not isinstance(payload, dict):
+            return func.HttpResponse("Invalid body", status_code=400)
 
-    try:
-        new_plan = req.get_json().get("plan")
-        if not new_plan:
-            return func.HttpResponse("Missing plan data", status_code=400)
+        # whitelist top-level fields you allow editing
+        allowed = {k: v for k, v in payload.items() if k in ["criteria", "plan", "metadata", "title", "notes"]}
+        if not allowed:
+            return func.HttpResponse("No updatable fields", status_code=400)
+        allowed["updatedAt"] = datetime.utcnow()
 
-        collections = get_db_collections()
-        gardens = collections["FutureGardens"]
+        col = get_db_collections()["FutureGardens"]
+        res = col.update_one({"_id": gid, "userId": user_oid}, {"$set": allowed})
+        if res.matched_count == 0:
+            return func.HttpResponse("Not found", status_code=404)
 
-        result = gardens.find_one({"_id": garden_object_id})
-        if not result or result["userId"] != user_object_id:
-            return func.HttpResponse("Not found or forbidden", status_code=404)
-
-        gardens.update_one(
-            {"_id": garden_object_id},
-            {"$set": {"plan": new_plan, "updatedAt": datetime.utcnow()}}
-        )
-
-        return func.HttpResponse("Plan updated", status_code=200)
-
+        return func.HttpResponse(status_code=204)
     except Exception as e:
-        logging.error(f"Edit error: {e}")
+        logging.error(f"Error updating garden: {e}")
         return func.HttpResponse("Internal server error", status_code=500)

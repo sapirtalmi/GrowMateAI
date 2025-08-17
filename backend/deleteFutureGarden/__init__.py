@@ -1,47 +1,31 @@
+# /futureGardens/{gardenId}  DELETE
 import azure.functions as func
 import logging
-import json
 from bson import ObjectId
-from bson.errors import InvalidId
 from ..shared.utils import get_user_id_from_token, get_db_collections
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("deleteFutureGarden function triggered")
+    logging.info("deleteFutureGarden triggered")
+    auth = req.headers.get("Authorization","")
+    if not auth.startswith("Bearer "): return func.HttpResponse("Unauthorized", status_code=401)
 
-    auth_header = req.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        return func.HttpResponse("Missing or invalid Authorization header", status_code=401)
-
-    token = auth_header.split(" ")[1]
     try:
-        user_id = get_user_id_from_token(token)
-        user_object_id = ObjectId(user_id)
+        user_oid = ObjectId(get_user_id_from_token(auth.split(" ")[1]))
     except Exception:
         return func.HttpResponse("Unauthorized", status_code=401)
 
+    gid = req.route_params.get("gardenId")
     try:
-        req_body = req.get_json()
-        garden_id = req_body.get("id")
+        gid = ObjectId(gid)
+    except Exception:
+        return func.HttpResponse("Invalid id", status_code=400)
 
-        if not garden_id:
-            return func.HttpResponse("Missing garden ID", status_code=400)
-
-        try:
-            garden_object_id = ObjectId(garden_id)
-        except InvalidId:
-            return func.HttpResponse("Invalid garden ID format", status_code=400)
-
-        collections = get_db_collections()
-        result = collections["FutureGardens"].delete_one({
-            "_id": garden_object_id,
-            "userId": user_object_id
-        })
-
-        if result.deleted_count == 0:
-            return func.HttpResponse("Garden not found or unauthorized", status_code=404)
-
-        return func.HttpResponse("Garden deleted", status_code=200)
-
+    try:
+        col = get_db_collections()["FutureGardens"]
+        res = col.delete_one({"_id": gid, "userId": user_oid})
+        if res.deleted_count == 0:
+            return func.HttpResponse("Not found", status_code=404)
+        return func.HttpResponse(status_code=204)
     except Exception as e:
-        logging.error(f"Delete error: {e}")
+        logging.error(f"Error deleting garden: {e}")
         return func.HttpResponse("Internal server error", status_code=500)
