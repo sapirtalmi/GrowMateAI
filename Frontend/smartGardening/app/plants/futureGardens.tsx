@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, ActivityIndicator, Button } from 'react-native-paper';
 import Header from '../components/header';
-import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router'; 
 import { getFutureGardens, deleteFutureGarden } from '../../src/api';
 export default function FutureGardens() {
-  const nav = useNavigation<any>();
   const [gardens, setGardens] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,7 +45,7 @@ export default function FutureGardens() {
             <Button
               icon="eye"
               mode="outlined"
-              onPress={() => nav.navigate('GardenDetails', { id: garden._id })}
+              onPress={() => router.push(`/plants/garden/${garden._id}`)}   
               style={styles.cardButton}
             >
               View
@@ -59,7 +58,9 @@ export default function FutureGardens() {
               textColor="red"
               onPress={() => onDelete(garden._id)}
               style={styles.cardButton}
-            >Delete</Button>
+            >
+              Delete
+            </Button>
           </View>
         </View>
       ))}

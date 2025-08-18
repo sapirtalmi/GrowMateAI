@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, TextInput as RNTextInput } from 'react-native';
 import { Text, Button, Chip, Divider } from 'react-native-paper';
+import { useLocalSearchParams } from 'expo-router';
 import { updateFutureGarden } from '../../src/api';
 
-export default function GardenDetails({ route }: any) {
-  // we receive the whole garden object from navigation
-  const initGarden = route.params?.garden;
+export default function GardenDetails() {
+  const params = useLocalSearchParams<{ garden: string }>();
+  const initGarden = params.garden ? JSON.parse(params.garden) : null;
+  
   const [garden, setGarden] = useState<any>(initGarden || null);
   const [loading, setLoading] = useState(!initGarden);
   const [editMode, setEditMode] = useState(false);
