@@ -21,7 +21,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not user:
             return func.HttpResponse("User not found", status_code=404)
 
-        # Select only safe/public profile fields
         profile = {
             "username": user.get("username"),
             "profileType": user.get("profileType"),

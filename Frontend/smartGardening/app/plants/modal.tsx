@@ -100,6 +100,7 @@ export default function AddPlantModal() {
   };
 
   return (
+  <>
     <ScrollView contentContainerStyle={styles.container}>
       <Header title="Main Menu" />
       <Text variant="headlineMedium" style={styles.title}>🌿 Add New Plant</Text>
@@ -149,92 +150,28 @@ export default function AddPlantModal() {
         Take a Photo
       </Button>
 
-      <Button
-        mode="contained"
-        onPress={handleAdd}
-        icon="plus-box"
-        style={{ marginTop: 20 }}
-      >
-        Add Plant
-      </Button>
+      {imageUri && (
+        <Image source={{ uri: imageUri }} style={styles.preview} />
+      )}
 
-      {imageUri && <Image source={{ uri: imageUri }} style={styles.preview} />}
-
+      {isLoading ? (
+        <ActivityIndicator animating={true} style={{ marginTop: 20 }} color={useTheme().colors.primary} />
+      ) : (
+        <Button
+          mode="contained"
+          onPress={handleAdd}
+          icon="plus-box"
+          style={{ marginTop: 20 }}
+        >
+          Add Plant
+        </Button>
+      )}
     </ScrollView>
 
-    <>
-      <Toast visible={toastVisible} message={toastMsg} onHide={() => setToastVisible(false)} />
-      <ScrollView contentContainerStyle={styles.container}>
-        <Header title="Main Menu" />
-        <Text variant="headlineMedium" style={styles.title}>
-          <TextInput.Icon icon="sprout" /> Add New Plant
-        </Text>
+    <Toast visible={toastVisible} message={toastMsg} onHide={() => setToastVisible(false)} />
+  </>
+);
 
-        <TextInput
-          label="Plant Name"
-          value={name}
-          onChangeText={setName}
-          mode="outlined"
-          style={styles.input}
-          left={<TextInput.Icon icon="leaf" />}
-        />
-
-        <TextInput
-          label="Device ID"
-          value={deviceID}
-          onChangeText={setDeviceId}
-          mode="outlined"
-          style={styles.input}
-          left={<TextInput.Icon icon="access-point" />}
-        />
-
-        <TextInput
-          label="Plant Type (e.g., Herb, Tree)"
-          value={plantType}
-          onChangeText={setPlantType}
-          mode="outlined"
-          style={styles.input}
-          left={<TextInput.Icon icon="flower" />}
-        />
-
-        <Button
-          mode="outlined"
-          onPress={pickFromGallery}
-          icon="image"
-          style={styles.button}
-        >
-          Choose from Gallery
-        </Button>
-
-        <Button
-          mode="outlined"
-          onPress={takePhoto}
-          icon="camera"
-          style={styles.button}
-        >
-          Take a Photo
-        </Button>
-
-        {imageUri && (
-          <Image source={{ uri: imageUri }} style={styles.preview} />
-        )}
-
-        {isLoading ? (
-          <ActivityIndicator animating={true} style={{ marginTop: 20 }} color={theme.colors.primary} />
-        ) : (
-          <Button
-            mode="contained"
-            onPress={handleAdd}
-            icon="plus-box"
-            style={styles.button}
-          >
-            Add Plant
-          </Button>
-        )}
-      </ScrollView>
-    </>
-
-  );
 }
 
 const styles = StyleSheet.create({
