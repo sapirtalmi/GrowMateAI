@@ -1,4 +1,4 @@
-from ..shared.utils import get_user_id_from_token, get_db_collections
+from ..shared.utils import get_user_id_from_token, get_db_collections , checkValidPlantName, addPlantToPlantsData
 from bson import ObjectId
 import azure.functions as func
 import logging
@@ -30,16 +30,27 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         return func.HttpResponse(f"Invalid input: {str(e)}", status_code=400)
 
-    plant = {
-        "name": name,
-        "plant_type": plant_type,
+    plantName = plant_type.strip().lower()
+    
+    result = checkValidPlantName(plant_type)
+
+    if not result or result == "invalid":
+        return func.HttpResponse("Invalid plant type provided.", status_code=420)
+    
+
+    if result == "valid":
+        addPlantToPlantsData(plantName)
+        plant = {
+        "nickname": name,
+        "plant_type": plantName,
         "sensorID": sensor_id
-    }
-
-    user_plants_collection.update_one(
-        {"userID": user_id},
-        {"$push": {"plants": plant}},
-        upsert=True
-    )
-
-    return func.HttpResponse(f"Plant added successfully for user {user_id}.", status_code=200)
+        }
+        user_plants_collection.update_one(
+            {"userID": user_id},
+            {"$push": {"plants": plant}},
+            upsert=True
+        )
+        return func.HttpResponse(f"Plant added successfully for user {user_id}.", status_code=200)
+    # If result is a suggestion, we return it
+    print(f"Suggestion for plant name: {result}")
+    return func.HttpResponse(result,status_code=421)

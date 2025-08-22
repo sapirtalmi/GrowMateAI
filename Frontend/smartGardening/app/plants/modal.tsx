@@ -4,10 +4,11 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter, Link } from 'expo-router';
 import { useState } from 'react';
 import { View, StyleSheet, Image, Alert, ScrollView } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
+
 import Header from '../components/header';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import { TextInput, Button, Text, useTheme, ActivityIndicator } from 'react-native-paper';
+import Toast from '../components/Toast';
 
 export default function AddPlantModal() {
   const router = useRouter();
@@ -15,6 +16,9 @@ export default function AddPlantModal() {
   const [deviceID, setDeviceId] = useState('');
   const [plantType, setPlantType] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const pickFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -49,25 +53,49 @@ export default function AddPlantModal() {
       Alert.alert("Missing info", "Please fill in both the name and device ID.");
       return;
     }
-
+    setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem('authToken');
       if (!token) {
         Alert.alert("Unauthorized", "No token found. Please log in again.");
+        setIsLoading(false);
         return;
       }
 
       const response = await axios.post(
-        'https://smart-gardening-functions.azurewebsites.net/api/addplant',
+        'https://smartgardeningfunctions.azurewebsites.net/api/addplant',
         { name, deviceID, plantType },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       console.log('Response:', response.data);
-      router.back();
+      setToastMsg('Plant added!');
+      setToastVisible(true);
+      setTimeout(() => {
+        setToastVisible(false);
+        router.back();
+      }, 2000);
     } catch (error: any) {
       console.error('Error adding plant:', error);
-      Alert.alert('Error', 'Failed to add plant. Please try again.');
+      if (error.response?.status === 421) {
+        const suggestedName = error.response.data;
+        if (suggestedName) {
+          console.log('Suggested name:', suggestedName);
+          Alert.alert(
+            'Invalid Plant Name',
+            `Suggested name: ${suggestedName}`,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Apply', onPress: () => setPlantType(suggestedName) }
+            ]
+          );
+        } else {
+          Alert.alert('Invalid Plant Name', 'No suggested name was provided.');
+        }
+        return;
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -133,6 +161,79 @@ export default function AddPlantModal() {
       {imageUri && <Image source={{ uri: imageUri }} style={styles.preview} />}
 
     </ScrollView>
+
+    <>
+      <Toast visible={toastVisible} message={toastMsg} onHide={() => setToastVisible(false)} />
+      <ScrollView contentContainerStyle={styles.container}>
+        <Header title="Main Menu" />
+        <Text variant="headlineMedium" style={styles.title}>
+          <TextInput.Icon icon="sprout" /> Add New Plant
+        </Text>
+
+        <TextInput
+          label="Plant Name"
+          value={name}
+          onChangeText={setName}
+          mode="outlined"
+          style={styles.input}
+          left={<TextInput.Icon icon="leaf" />}
+        />
+
+        <TextInput
+          label="Device ID"
+          value={deviceID}
+          onChangeText={setDeviceId}
+          mode="outlined"
+          style={styles.input}
+          left={<TextInput.Icon icon="access-point" />}
+        />
+
+        <TextInput
+          label="Plant Type (e.g., Herb, Tree)"
+          value={plantType}
+          onChangeText={setPlantType}
+          mode="outlined"
+          style={styles.input}
+          left={<TextInput.Icon icon="flower" />}
+        />
+
+        <Button
+          mode="outlined"
+          onPress={pickFromGallery}
+          icon="image"
+          style={styles.button}
+        >
+          Choose from Gallery
+        </Button>
+
+        <Button
+          mode="outlined"
+          onPress={takePhoto}
+          icon="camera"
+          style={styles.button}
+        >
+          Take a Photo
+        </Button>
+
+        {imageUri && (
+          <Image source={{ uri: imageUri }} style={styles.preview} />
+        )}
+
+        {isLoading ? (
+          <ActivityIndicator animating={true} style={{ marginTop: 20 }} color={theme.colors.primary} />
+        ) : (
+          <Button
+            mode="contained"
+            onPress={handleAdd}
+            icon="plus-box"
+            style={styles.button}
+          >
+            Add Plant
+          </Button>
+        )}
+      </ScrollView>
+    </>
+
   );
 }
 
