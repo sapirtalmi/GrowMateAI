@@ -1,4 +1,3 @@
-// app/plants/garden/[id].tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, ScrollView, StyleSheet, TextInput as RNTextInput } from 'react-native';
 import { Text, Button, Chip, Divider } from 'react-native-paper';
@@ -12,11 +11,11 @@ export default function GardenDetails() {
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
 
-  // title/notes
+  // title and notes
   const [title, setTitle] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
 
-  // NEW: editable copies
+  // new editable copies
   const [editableCriteria, setEditableCriteria] = useState<any>({});
   const [editablePlan, setEditablePlan] = useState<any>({ plants: [], additionalTips: [] });
 
