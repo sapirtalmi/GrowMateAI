@@ -132,9 +132,6 @@ export default function AddPlantModal() {
 
       {imageUri && <Image source={{ uri: imageUri }} style={styles.preview} />}
 
-      <Button mode="contained" onPress={handleAdd} style={{ marginTop: 20 }}>
-        Add Plant
-      </Button>
     </ScrollView>
   );
 }

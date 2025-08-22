@@ -16,6 +16,8 @@ API.interceptors.request.use(async (config) => {
 // --- exact routes (case-sensitive) ---
 export const getFutureGardens  = () => API.get('/getFutureGardens');
 export const saveFutureGarden  = (payload: any) => API.post('/saveFutureGarden', payload);
-export const deleteFutureGarden = (id: string) => API.delete(`/deleteFutureGarden/${id}`);
-export const updateFutureGarden = (id: string, body: any) => API.patch(`/editFutureGarden/${id}`, body);
+export const deleteFutureGarden = (id: string) =>
+  API.delete(`/deleteFutureGarden/${id}`);
+export const updateFutureGarden = (id: string, body: any) =>
+  API.patch(`/editFutureGarden/${id}`, body);
 export const planYourGarden     = (body: any) => API.post('/planYourGarden', body);

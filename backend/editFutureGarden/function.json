@@ -5,8 +5,8 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": [ "put" ],
-      "route": "editFutureGarden"
+      "methods": [ "patch" ],
+      "route": "editFutureGarden/{gardenId}"
     },
     {
       "type": "http",
