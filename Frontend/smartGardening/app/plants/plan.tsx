@@ -19,8 +19,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Header from '../components/header';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useRouter } from 'expo-router';
+
 
 export default function PlanYourGardenScreen() {
+  const router = useRouter();
+
   const [form, setForm] = useState({
     environment: '',
     sunDirection: '',
@@ -59,6 +63,26 @@ export default function PlanYourGardenScreen() {
       );
 
       setResult(res.data);
+
+      // Immediately save the result to the database
+      try {
+        await axios.post(
+          'https://smart-gardening-functions.azurewebsites.net/api/savefuturegarden',
+          { plan: res.data },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        console.log("Saved plan to database.");
+      } catch (saveError) {
+        console.error("Error saving plan:", saveError);
+        alert("Plan generated but could not be saved.");
+      }
+
+
     } catch (error) {
       console.error('Error generating plan:', error);
       alert('Failed to generate garden plan.');
@@ -126,7 +150,19 @@ export default function PlanYourGardenScreen() {
               </Text>
             ))}
           </View>
+          
         )}
+
+          <Button
+              icon="eye"
+              mode="outlined"
+              style={{ marginTop: 10 }}
+              onPress={() => router.push('/plants/futureGardens')}
+            >
+              View Saved Gardens
+            </Button>
+
+
       </ScrollView>
     </KeyboardAvoidingView>
   );

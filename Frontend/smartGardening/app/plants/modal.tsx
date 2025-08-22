@@ -1,16 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import { useState } from 'react';
 import { View, StyleSheet, Image, Alert, ScrollView } from 'react-native';
-import { TextInput, Button, Text, useTheme, ActivityIndicator } from 'react-native-paper';
+
 import Header from '../components/header';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { TextInput, Button, Text, useTheme, ActivityIndicator } from 'react-native-paper';
 import Toast from '../components/Toast';
 
 export default function AddPlantModal() {
   const router = useRouter();
-  const theme = useTheme();
   const [name, setName] = useState('');
   const [deviceID, setDeviceId] = useState('');
   const [plantType, setPlantType] = useState('');
@@ -49,7 +50,7 @@ export default function AddPlantModal() {
 
   const handleAdd = async () => {
     if (!name || !deviceID) {
-      Alert.alert("Missing Info", "Please fill in both the name and device ID.");
+      Alert.alert("Missing info", "Please fill in both the name and device ID.");
       return;
     }
     setIsLoading(true);
@@ -99,6 +100,68 @@ export default function AddPlantModal() {
   };
 
   return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Header title="Main Menu" />
+      <Text variant="headlineMedium" style={styles.title}>🌿 Add New Plant</Text>
+
+      <TextInput
+        label="Plant Name"
+        value={name}
+        onChangeText={setName}
+        mode="outlined"
+        style={styles.input}
+        left={<TextInput.Icon icon="leaf" />}
+      />
+
+      <TextInput
+        label="Device ID"
+        value={deviceID}
+        onChangeText={setDeviceId}
+        mode="outlined"
+        style={styles.input}
+        left={<TextInput.Icon icon="access-point" />}
+      />
+
+      <TextInput
+        label="Plant Type (e.g., Herb, Tree)"
+        value={plantType}
+        onChangeText={setPlantType}
+        mode="outlined"
+        style={styles.input}
+        left={<TextInput.Icon icon="flower" />}
+      />
+
+      <Button
+        mode="outlined"
+        onPress={pickFromGallery}
+        icon="image"
+        style={styles.button}
+      >
+        Choose from Gallery
+      </Button>
+
+      <Button
+        mode="outlined"
+        onPress={takePhoto}
+        icon="camera"
+        style={styles.button}
+      >
+        Take a Photo
+      </Button>
+
+      <Button
+        mode="contained"
+        onPress={handleAdd}
+        icon="plus-box"
+        style={{ marginTop: 20 }}
+      >
+        Add Plant
+      </Button>
+
+      {imageUri && <Image source={{ uri: imageUri }} style={styles.preview} />}
+
+    </ScrollView>
+
     <>
       <Toast visible={toastVisible} message={toastMsg} onHide={() => setToastVisible(false)} />
       <ScrollView contentContainerStyle={styles.container}>
@@ -170,6 +233,7 @@ export default function AddPlantModal() {
         )}
       </ScrollView>
     </>
+
   );
 }
 
@@ -186,7 +250,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   button: {
-    marginTop: 10,
+    marginTop: 8,
   },
   preview: {
     width: 180,
