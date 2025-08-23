@@ -64,7 +64,7 @@ export default function DiagnoseScreen() {
       });
 
       const res = await axios.post(
-        'https://smart-gardening-functions.azurewebsites.net/api/plantdiagnosis',
+        'https://smartgardeningfunctions.azurewebsites.net/api/plantdiagnosis',
         {
           plantType: plantName,
           complaint: content,
@@ -85,7 +85,7 @@ export default function DiagnoseScreen() {
       setDiagnosis(diagnosisText);
 
       await axios.post(
-        'https://smart-gardening-functions.azurewebsites.net/api/createCommunityPost',
+        'https://smartgardeningfunctions.azurewebsites.net/api/createCommunityPost',
         {
           title,
           plantName,

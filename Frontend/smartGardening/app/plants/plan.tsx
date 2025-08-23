@@ -52,7 +52,7 @@ export default function PlanYourGardenScreen() {
       if (!token) throw new Error('Missing token');
 
       const res = await axios.post(
-        'https://smart-gardening-functions.azurewebsites.net/api/planyourgarden',
+        'https://smartgardeningfunctions.azurewebsites.net/api/planyourgarden',
         form,
         {
           headers: {
@@ -67,7 +67,7 @@ export default function PlanYourGardenScreen() {
       // Immediately save the result to the database
       try {
         await axios.post(
-          'https://smart-gardening-functions.azurewebsites.net/api/savefuturegarden',
+          'https://smartgardeningfunctions.azurewebsites.net/api/savefuturegarden',
           { plan: res.data },
           {
             headers: {

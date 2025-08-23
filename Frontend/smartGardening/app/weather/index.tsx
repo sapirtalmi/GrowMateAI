@@ -33,19 +33,28 @@ export default function WeatherForecastScreen() {
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
   const [tips, setTips] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const theme = useTheme();
 
   useEffect(() => {
     const fetchWeather = async () => {
       try {
+        setError(null);
         const res = await axios.get(
-          `https://smart-gardening-functions.azurewebsites.net/api/getweatherforecast?city=${encodeURIComponent(city)}`
+          `https://smartgardeningfunctions.azurewebsites.net/api/getweatherforecast?city=${encodeURIComponent(city)}`
         );
         setForecast(res.data.forecast || []);
         setCurrent(res.data.current || null);
         setTips(res.data.tips || []);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to fetch weather', err);
+        if (err.response?.status === 500 && err.response?.data?.includes('API key not configured')) {
+          setError('Weather service is not configured. Please contact support.');
+        } else if (err.response?.status >= 400) {
+          setError(`Weather service error: ${err.response?.data || 'Unknown error'}`);
+        } else {
+          setError('Failed to fetch weather data. Please check your internet connection.');
+        }
       } finally {
         setLoading(false);
       }
@@ -56,12 +65,36 @@ export default function WeatherForecastScreen() {
 
   if (loading) {
     return (
-      <ActivityIndicator
-        animating
-        size="large"
-        style={{ marginTop: 50 }}
-        color={theme.colors.primary}
-      />
+      <View style={styles.container}>
+        <Header title="Weather Forecast" />
+        <ActivityIndicator
+          animating
+          size="large"
+          style={{ marginTop: 50 }}
+          color={theme.colors.primary}
+        />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Header title="Weather Forecast" />
+        <Card style={[styles.card, { margin: 16 }]}>
+          <Card.Content>
+            <View style={{ alignItems: 'center', padding: 20 }}>
+              <Icon name="weather-cloudy-alert" size={48} color={theme.colors.error} />
+              <Text variant="titleMedium" style={{ marginTop: 10, textAlign: 'center' }}>
+                Weather Unavailable
+              </Text>
+              <Text style={{ marginTop: 8, textAlign: 'center', color: theme.colors.error }}>
+                {error}
+              </Text>
+            </View>
+          </Card.Content>
+        </Card>
+      </View>
     );
   }
 

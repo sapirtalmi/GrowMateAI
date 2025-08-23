@@ -90,13 +90,28 @@ export default function RegisterScreen() {
         return;
       }
 
-      if (!res.ok) throw new Error('Unexpected error');
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Registration failed with status:', res.status, 'Error:', errorText);
+        throw new Error(`Registration failed: ${res.status} - ${errorText}`);
+      }
 
+      const responseData = await res.json();
+      console.log('Registration successful:', responseData);
+      
       Alert.alert('Success', 'Account created! You can now log in.');
       router.replace('/');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Register error:', err);
-      Alert.alert('Error', 'Could not register. Please try again.');
+      
+      // More specific error handling
+      if (err.message?.includes('Network request failed') || err.message?.includes('fetch')) {
+        Alert.alert('Network Error', 'Please check your internet connection and try again.');
+      } else if (err.message?.includes('Registration failed')) {
+        Alert.alert('Registration Failed', err.message);
+      } else {
+        Alert.alert('Error', 'Could not register. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
