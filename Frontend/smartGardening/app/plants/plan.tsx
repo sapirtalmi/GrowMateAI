@@ -20,6 +20,7 @@ import axios from 'axios';
 import Header from '../components/header';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRouter } from 'expo-router';
+import OptionSelector from './components/OptionSelector';
 
 
 export default function PlanYourGardenScreen() {
@@ -105,16 +106,69 @@ export default function PlanYourGardenScreen() {
           </Text>
         </View>
 
-        {Object.keys(form).map((key) => (
-          <TextInput
-            key={key}
-            label={key.replace(/([A-Z])/g, ' $1')}
-            value={form[key as keyof typeof form]}
-            onChangeText={(text) => handleChange(key, text)}
-            mode="outlined"
-            style={styles.input}
-          />
-        ))}
+        <OptionSelector
+          label="Environment"
+          options={['Balcony', 'Yard', 'Rooftop', 'Indoor']}
+          value={form.environment}
+          onSelect={(val) => handleChange('environment', val)}
+        />
+
+        <OptionSelector
+          label="Sun Direction"
+          options={['North', 'South', 'East', 'West']}
+          value={form.sunDirection}
+          onSelect={(val) => handleChange('sunDirection', val)}
+        />
+
+        <OptionSelector
+          label="Sunlight Hours"
+          options={['2–4', '4–6', '6–8', '8+']}
+          value={form.sunlightHours}
+          onSelect={(val) => handleChange('sunlightHours', val)}
+        />
+
+        <OptionSelector
+          label="City"
+          options={['Tel Aviv', 'Jerusalem', 'Haifa']}
+          value={form.city}
+          onSelect={(val) => handleChange('city', val)}
+        />
+
+        <OptionSelector
+          label="Plant Preference"
+          options={['Flowers', 'Trees', 'Herbs', 'Veggies']}
+          value={form.plantPreference}
+          onSelect={(val) => handleChange('plantPreference', val)}
+        />
+
+        <OptionSelector
+          label="Maintenance Level"
+          options={['Low', 'Medium', 'High']}
+          value={form.maintenanceLevel}
+          onSelect={(val) => handleChange('maintenanceLevel', val)}
+        />
+
+        <OptionSelector
+          label="Scent Preference"
+          options={['Scented', 'Non-scented']}
+          value={form.scentPreference}
+          onSelect={(val) => handleChange('scentPreference', val)}
+        />
+
+        <OptionSelector
+          label="Color Preference"
+          options={['Green', 'Colorful', 'Red', 'Purple']}
+          value={form.colorPreference}
+          onSelect={(val) => handleChange('colorPreference', val)}
+        />
+
+        <OptionSelector
+          label="Placement"
+          options={['Ground', 'Planter']}
+          value={form.placement}
+          onSelect={(val) => handleChange('placement', val)}
+        />
+
 
         {loading ? (
           <ActivityIndicator animating={true} size="large" />
