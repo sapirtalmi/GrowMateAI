@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Modal, TextInput, ActivityIndicator, Alert, TouchableOpacity, Animated, Easing } from 'react-native';
+import { View, StyleSheet, ScrollView, Modal, TextInput, ActivityIndicator, Alert, TouchableOpacity, Animated, Easing, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card, Text } from 'react-native-paper';
 import Header from './components/header';
@@ -87,6 +87,34 @@ export default function MenuScreen() {
     }
   };
 
+  const [currentWeather, setCurrentWeather] = React.useState<{
+  icon: string;
+  temp: number;
+  condition: string;
+} | null>(null);
+
+React.useEffect(() => {
+  const fetchWeather = async () => {
+    try {
+      const res = await fetch(
+        'https://smart-gardening-functions.azurewebsites.net/api/getweatherforecast?city=Tel%20Aviv'
+      );
+      const data = await res.json();
+      if (data?.current) {
+        setCurrentWeather({
+          icon: data.current.icon,
+          temp: data.current.temp,
+          condition: data.current.condition,
+        });
+      }
+    } catch (err) {
+      console.error('Weather fetch failed:', err);
+    }
+  };
+
+  fetchWeather();
+}, []);
+
   // Only fetch notifications once on mount, not on every render
   useEffect(() => {
     fetchNotifications();
@@ -114,7 +142,24 @@ export default function MenuScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Header title="Main Menu" />
-      <Text variant="headlineMedium" style={styles.title}>GrowMateAI Menu</Text>
+      <View style={styles.titleRow}>
+        <Text variant="headlineMedium" style={styles.title}>GrowMateAI Menu</Text>
+
+        {currentWeather && (
+          <View style={styles.weatherBox}>
+            <Image
+              source={{ uri: `https://openweathermap.org/img/wn/${currentWeather.icon}@2x.png` }}
+              style={styles.weatherIcon}
+            />
+            <View>
+              <Text style={styles.weatherText}>{currentWeather.temp}°C</Text>
+              <Text style={styles.weatherCondition}>{currentWeather.condition}</Text>
+            </View>
+          </View>
+        )}
+      </View>
+
+
 
       {/* Notifications slot */}
       <Card style={styles.notificationsCard} onPress={() => setNotificationsVisible(true)}>
@@ -343,6 +388,42 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#f6fff6',
   },
+  titleRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginVertical: 16,
+  paddingHorizontal: 8,
+  },
+
+  weatherBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e0f5e9',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+    elevation: 2,
+  },
+
+  weatherIcon: {
+    width: 38,
+    height: 38,
+    marginRight: 8,
+  },
+
+  weatherText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+  },
+
+  weatherCondition: {
+    fontSize: 12,
+    color: '#4caf50',
+  },
+
   title: {
     marginVertical: 16,
     textAlign: 'center',
