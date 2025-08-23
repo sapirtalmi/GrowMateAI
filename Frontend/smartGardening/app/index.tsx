@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { getCurrentLocation } from './utils/locationService';
 
 export default function App() {
   const [username, setUsername] = useState('');
@@ -33,6 +34,14 @@ export default function App() {
       await AsyncStorage.setItem('authToken', token);
       await AsyncStorage.setItem('username', username);
       await AsyncStorage.setItem('userID', user_id);
+
+      // Request location permission and get coordinates after successful login
+      const location = await getCurrentLocation();
+      if (location) {
+        console.log('✅ User location obtained after login:', location);
+      } else {
+        console.log('⚠️ Could not obtain user location');
+      }
 
       router.replace('/menu');
     } catch (error: any) {
@@ -78,7 +87,7 @@ export default function App() {
 
       <Pressable onPress={() => router.push('/register')}>
         <Text style={styles.registerText}>
-          Don't have an account? <Text style={{ color: theme.colors.primary }}>Register here</Text>
+          Don&apos;t have an account? <Text style={{ color: theme.colors.primary }}>Register here</Text>
         </Text>
       </Pressable>
     </View>

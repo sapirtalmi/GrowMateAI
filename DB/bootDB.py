@@ -1,4 +1,6 @@
-from pymongo import MongoClient
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = "SmartGardenDB"
+COLLECTION_NAME = "users"from pymongo import MongoClient
 
 # Replace with your actual connection string
 uri = "mongodb://<username>:<password>@<your-cluster>.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false"

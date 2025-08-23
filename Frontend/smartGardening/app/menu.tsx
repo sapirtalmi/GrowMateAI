@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Modal, TextInput, ActivityIndicator, Alert, TouchableOpacity, Animated, Easing } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card, Text } from 'react-native-paper';
@@ -13,6 +13,7 @@ const menuItems = [
   { title: 'My GrowMates', icon: 'access-point', route: '/sensor' },
   { title: 'Diagnose Plant Problem', icon: 'brain', route: '/diagnose' },
   { title: 'Community', icon: 'account-group', route: '/community' },
+  { title: 'Hazards', icon: 'alert-octagon', route: '/hazards' },
   { title: 'Settings', icon: 'cog', route: '/settings' },
   { title: 'Add a GrowMate!', icon: 'wifi-plus', route: 'add-sensor-modal' }, // New menu item
 ];
