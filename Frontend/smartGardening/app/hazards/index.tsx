@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { Text, TextInput, Button } from 'react-native-paper';
+import { Text, TextInput, Button, Switch, Card, Divider } from 'react-native-paper';
 import MapView, { Marker, Circle, Callout } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
@@ -79,6 +79,11 @@ export default function HazardsScreen() {
   const [currentRadius, setCurrentRadius] = useState<number>(DEFAULT_RADIUS);
   const [isLoadingHazards, setIsLoadingHazards] = useState<boolean>(false);
   const [radiusSliderIndex, setRadiusSliderIndex] = useState<number>(1); // Default to 2km (index 1)
+  
+  // Email notification states
+  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState<boolean>(false);
+  const [notificationDistance, setNotificationDistance] = useState<number>(10); // Default 10km
+  const [isUpdatingNotifications, setIsUpdatingNotifications] = useState<boolean>(false);
 
   useEffect(() => {
     // Load stored user location when component mounts
@@ -89,11 +94,85 @@ export default function HazardsScreen() {
         console.log('📍 Loaded user location for Hazards map:', location);
         // Fetch hazards once we have the user location
         await fetchHazards(location);
+        // Load email notification settings
+        await loadEmailNotificationSettings();
       }
     };
     
     loadUserLocation();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load email notification settings from user profile
+  const loadEmailNotificationSettings = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/getUserProfile`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        console.log('📧 Loaded user notification settings:', userData);
+        
+        // Set notification settings from user data
+        setEmailNotificationsEnabled(userData.hazardEmailNotifications?.enabled || false);
+        setNotificationDistance(userData.hazardEmailNotifications?.distance || 10);
+      }
+    } catch (error) {
+      console.error('❌ Error loading notification settings:', error);
+    }
+  };
+
+  // Update email notification settings
+  const updateEmailNotificationSettings = async (enabled: boolean, distance?: number) => {
+    setIsUpdatingNotifications(true);
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        Alert.alert('Error', 'Please log in to update notification settings');
+        return;
+      }
+
+      const updateData = {
+        hazardEmailNotifications: {
+          enabled: enabled,
+          distance: distance !== undefined ? distance : notificationDistance
+        }
+      };
+
+      const response = await fetch(`${API_BASE_URL}/updateUserNotificationSettings`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (response.ok) {
+        console.log('✅ Email notification settings updated successfully');
+        setEmailNotificationsEnabled(enabled);
+        if (distance !== undefined) {
+          setNotificationDistance(distance);
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Failed to update notification settings:', errorData);
+        Alert.alert('Error', 'Failed to update notification settings');
+      }
+    } catch (error) {
+      console.error('❌ Error updating notification settings:', error);
+      Alert.alert('Error', 'Network error while updating settings');
+    } finally {
+      setIsUpdatingNotifications(false);
+    }
+  };
 
   // Navigate to discussion page for a specific hazard
   const navigateToDiscussion = (hazard: HazardData) => {
@@ -303,6 +382,18 @@ export default function HazardsScreen() {
     latitudeDelta: 0.5,
     longitudeDelta: 0.5,
   } : INITIAL_REGION;
+
+  // Handle email notification toggle
+  const handleEmailNotificationToggle = (value: boolean) => {
+    setEmailNotificationsEnabled(value);
+    updateEmailNotificationSettings(value);
+  };
+
+  // Handle notification distance change
+  const handleNotificationDistanceChange = (distance: number) => {
+    setNotificationDistance(distance);
+    updateEmailNotificationSettings(emailNotificationsEnabled, distance);
+  };
 
   return (
     <View style={styles.container}>
@@ -590,6 +681,72 @@ export default function HazardsScreen() {
           </ScrollView>
         </View>
       </Modal>
+
+      {/* Email Notification Settings */}
+      <Card style={styles.notificationCard}>
+        <Card.Content>
+          <View style={styles.notificationHeader}>
+            <Icon name="email-alert" size={24} color="#388e3c" />
+            <Text style={styles.notificationTitle}>Email Notifications</Text>
+          </View>
+          
+          <View style={styles.notificationToggle}>
+            <Text style={styles.notificationLabel}>
+              Get email notifications for hazards near me
+            </Text>
+            <Switch
+              value={emailNotificationsEnabled}
+              onValueChange={handleEmailNotificationToggle}
+              color="#388e3c"
+              disabled={isUpdatingNotifications}
+            />
+          </View>
+          
+          {emailNotificationsEnabled && (
+            <>
+              <Divider style={styles.notificationDivider} />
+              <View style={styles.distanceSelector}>
+                <Text style={styles.distanceLabel}>
+                  Notification Distance: {notificationDistance}km
+                </Text>
+                <Text style={styles.distanceSubtitle}>
+                  Receive alerts for hazards within this distance
+                </Text>
+                
+                <View style={styles.distanceOptions}>
+                  {RADIUS_OPTIONS.map((distance) => (
+                    <TouchableOpacity
+                      key={distance}
+                      style={[
+                        styles.distanceOption,
+                        notificationDistance === distance && styles.activeDistanceOption
+                      ]}
+                      onPress={() => handleNotificationDistanceChange(distance)}
+                      disabled={isUpdatingNotifications}
+                    >
+                      <Text
+                        style={[
+                          styles.distanceOptionText,
+                          notificationDistance === distance && styles.activeDistanceOptionText
+                        ]}
+                      >
+                        {distance}km
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                
+                {isUpdatingNotifications && (
+                  <View style={styles.updatingIndicator}>
+                    <ActivityIndicator size="small" color="#388e3c" />
+                    <Text style={styles.updatingText}>Updating settings...</Text>
+                  </View>
+                )}
+              </View>
+            </>
+          )}
+        </Card.Content>
+      </Card>
     </View>
   );
 }
@@ -886,5 +1043,97 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 6,
+  },
+  // Notification settings styles
+  notificationCard: {
+    margin: 16,
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  notificationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#e8f5e8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#388e3c',
+  },
+  notificationTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginLeft: 8,
+  },
+  notificationToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  notificationLabel: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
+  },
+  notificationDivider: {
+    backgroundColor: '#388e3c',
+    height: 1,
+    marginVertical: 8,
+  },
+  distanceSelector: {
+    padding: 16,
+  },
+  distanceLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginBottom: 4,
+  },
+  distanceSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+  },
+  distanceOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  distanceOption: {
+    backgroundColor: '#f5f5f5',
+    borderWidth: 2,
+    borderColor: '#c8e6c9',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  activeDistanceOption: {
+    backgroundColor: '#2e7d32',
+    borderColor: '#2e7d32',
+  },
+  distanceOptionText: {
+    fontSize: 14,
+    color: '#388e3c',
+    fontWeight: '600',
+  },
+  activeDistanceOptionText: {
+    color: '#fff',
+  },
+  updatingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  updatingText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#388e3c',
+    fontWeight: '600',
   },
 });

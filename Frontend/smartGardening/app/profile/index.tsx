@@ -33,7 +33,7 @@ export default function ProfileScreen() {
         if (!token) throw new Error('Missing token');
 
         const res = await axios.get(
-          'https://smart-gardening-functions.azurewebsites.net/api/getUserProfile',
+          'https://smartgardeningfunctions.azurewebsites.net/api/getUserProfile',
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

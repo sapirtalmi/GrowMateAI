@@ -3,7 +3,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const API = axios.create({
-  baseURL: 'https://smart-gardening-functions.azurewebsites.net/api',
+  baseURL: 'https://smartgardeningfunctions.azurewebsites.net/api',
 });
 
 API.interceptors.request.use(async (config) => {

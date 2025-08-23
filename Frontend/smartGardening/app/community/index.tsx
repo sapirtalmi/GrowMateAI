@@ -45,7 +45,7 @@ export default function CommunityScreen() {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         const res = await axios.get(
-          'https://smart-gardening-functions.azurewebsites.net/api/getCommunityPosts',
+          'https://smartgardeningfunctions.azurewebsites.net/api/getCommunityPosts',
           { headers }
         );
 

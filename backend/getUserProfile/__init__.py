@@ -28,7 +28,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "reputationScore": user.get("reputationScore", 0),
             "votesReceived": user.get("votesReceived", 0),
             "postsCount": user.get("postsCount", 0),
-            "commentsCount": user.get("commentsCount", 0)
+            "commentsCount": user.get("commentsCount", 0),
+            "hazardEmailNotifications": user.get("hazardEmailNotifications", {
+                "enabled": False,
+                "distance": 10
+            })
         }
 
         return func.HttpResponse(

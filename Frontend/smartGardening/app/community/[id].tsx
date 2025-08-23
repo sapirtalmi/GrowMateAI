@@ -62,7 +62,7 @@ export default function CommunityPostDetails() {
     const fetchPost = async () => {
       try {
         const res = await axios.get(
-          `https://smart-gardening-functions.azurewebsites.net/api/getcommunitypostbyid?id=${id}`
+          `https://smartgardeningfunctions.azurewebsites.net/api/getcommunitypostbyid?id=${id}`
         );
         setPost(res.data);
       } catch (error) {
@@ -81,7 +81,7 @@ export default function CommunityPostDetails() {
     try {
       setCommentsLoading(true);
       const res = await axios.get(
-        `https://smart-gardening-functions.azurewebsites.net/api/getcommentsbypostid?postID=${encodeURIComponent(postId)}`
+        `https://smartgardeningfunctions.azurewebsites.net/api/getcommentsbypostid?postID=${encodeURIComponent(postId)}`
       );
       setComments(res.data);
       setShowComments(true);
@@ -99,7 +99,7 @@ export default function CommunityPostDetails() {
       setSubmitting(true);
       const token = await AsyncStorage.getItem('authToken');
       await axios.post(
-        'https://smart-gardening-functions.azurewebsites.net/api/createcomment',
+        'https://smartgardeningfunctions.azurewebsites.net/api/createcomment',
         { postID: postId, content: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -118,7 +118,7 @@ export default function CommunityPostDetails() {
       if (!token) return;
 
       await axios.post(
-        'https://smart-gardening-functions.azurewebsites.net/api/votecontent',
+        'https://smartgardeningfunctions.azurewebsites.net/api/votecontent',
         { contentID, vote, type },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -126,7 +126,7 @@ export default function CommunityPostDetails() {
       Alert.alert('Success', 'Vote recorded!');
       if (type === 'post') {
         const res = await axios.get(
-          `https://smart-gardening-functions.azurewebsites.net/api/getcommunitypostbyid?id=${id}`
+          `https://smartgardeningfunctions.azurewebsites.net/api/getcommunitypostbyid?id=${id}`
         );
         setPost(res.data);
       } else {
