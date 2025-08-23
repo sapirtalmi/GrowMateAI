@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from pymongo import MongoClient
 import openai
 import json
+import azure.functions as func
 
 # === JWT HELPERS ===
 def get_user_id_from_token(token: str) -> str:
@@ -46,7 +47,8 @@ def get_db_collections():
         "Votes": db['Votes'],
         "FutureGardens": db['FutureGardens']
         "SensorStock": db['SensorStock'],
-        "PlantsData": db['PlantsData']
+        "PlantsData": db['PlantsData'],
+        "Hazards": db['Hazards'],
 
     }
     except Exception as e:
@@ -180,3 +182,21 @@ def addPlantToPlantsData(plant_name: str) -> None:
         print(f"❌ Error adding plant '{plant_name}': {e}")
 
 
+# === CORS HELPERS ===
+def corsify_response(response: func.HttpResponse) -> func.HttpResponse:
+    """Add CORS headers to an Azure Function HTTP response"""
+    headers = dict(response.headers) if response.headers else {}
+    headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+        'Access-Control-Max-Age': '86400'
+    })
+    
+    return func.HttpResponse(
+        body=response.get_body(),
+        status_code=response.status_code,
+        headers=headers,
+        mimetype=response.mimetype,
+        charset=response.charset
+    )

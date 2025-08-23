@@ -7,18 +7,21 @@ import requests  # Only needed if you want to send over HTTP
 def generate_sensor_data():
     return {
         "sensorID": "sensor123123",
-        "Humidity": round(random.uniform(20, 60), 2),
-        "Temperature": round(random.uniform(18, 30), 2),
-        "SoilMoisture": random.randint(1, 4)
+        "humidity": round(random.uniform(20, 60), 2),
+        "temperature": round(random.uniform(18, 30), 2),
+        "moisture": random.randint(1, 4)
     }
 
-def send_data(data, endpoint='http://localhost:7071/api/SignalProcessing'):
+def send_data(data, endpoint='https://smartgardeningfunctions.azurewebsites.net/api/ingestsensordata'):
     print("Sending data...")
     if endpoint:
         try:
             print("Sending data to endpoint:", endpoint)
             response = requests.post(endpoint, json=data)
-            print(f"Sent to {endpoint}: {data} | Status: {response.status_code}")
+            if response.status_code == 500:
+                print(f"Error 500: {response.text}")
+            else:
+                print(f"Sent to {endpoint}: {data} | Status: {response.status_code}")
         except requests.RequestException as e:
             print(f"Failed to send data: {e}")
     else:
@@ -30,7 +33,7 @@ def run_timed(interval, endpoint=None):
         send_data(data, endpoint)
         time.sleep(interval)
 
-def run_manual(endpoint='http://localhost:7071/api/SignalProcessing'):
+def run_manual(endpoint='https://smartgardeningfunctions.azurewebsites.net/api/ingestsensordata'):
     print("Press ENTER to send data. Ctrl+C to exit.")
     while True:
         input()
