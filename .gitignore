@@ -54,7 +54,7 @@ project.lock.json
 /packages/
 TestResults/
 tools/NuGet.exe
-
+Frontend/smartGardening/package-lock.json
 # App data and secrets
 App_Data/
 .secrets/
