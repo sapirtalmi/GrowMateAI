@@ -3,6 +3,10 @@ import azure.functions as func
 import logging
 import bcrypt
 import json
+import traceback
+from bson.binary import Binary
+
+
 
 
 # MongoDB setup
@@ -18,25 +22,43 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         password = req_body.get("password")
 
         if not username or not password:
-            return func.HttpResponse("Missing username or password", status_code=400)
+            return func.HttpResponse(
+                json.dumps({"error": "Missing username or password"}),
+                status_code=400,
+                mimetype="application/json"
+            )
 
         user = users_collection.find_one({"username": username})
         
         if not user:
-            return func.HttpResponse("User not found", status_code=401)
+            return func.HttpResponse(
+                json.dumps({"error": "Invalid username or password"}),
+                status_code=401,
+                mimetype="application/json"
+            )
 
         hashed_pw = user.get("hashed_password")
 
         if not hashed_pw:
-            return func.HttpResponse("Password not set for user", status_code=500)
+            return func.HttpResponse(
+                json.dumps({"error": "Password not set for user"}),
+                status_code=500,
+                mimetype="application/json"
+            )
+
 
         # Ensure hashed_pw is bytes
-        if isinstance(hashed_pw, str):
+        if isinstance(hashed_pw, Binary):
+            hashed_pw = bytes(hashed_pw)
+        elif isinstance(hashed_pw, str):
             hashed_pw = hashed_pw.encode("utf-8")
 
         if not bcrypt.checkpw(password.encode("utf-8"), hashed_pw):
-            return func.HttpResponse("Invalid password", status_code=401)
-        
+            return func.HttpResponse(
+                json.dumps({"error": "Invalid username or password"}),
+                status_code=401,
+                mimetype="application/json"
+            )
 
         payload = {
             "username": username,
@@ -54,5 +76,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     except Exception as e:
-        logging.error(f"Login error: {e}")
-        return func.HttpResponse("Internal server error", status_code=500)
+        logging.error("Login error:\n" + traceback.format_exc())
+        return func.HttpResponse(
+            json.dumps({"error": "Internal server error"}),
+            status_code=500,
+            mimetype="application/json"
+        )
