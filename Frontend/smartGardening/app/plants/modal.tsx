@@ -2,18 +2,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 
-import { useRouter,Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, Alert, ScrollView } from 'react-native';
+import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { TextInput, Button, Text, useTheme, ActivityIndicator, Menu } from 'react-native-paper';
 
 import Header from '../components/header';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { TextInput, Button, Text, useTheme, ActivityIndicator } from 'react-native-paper';
 import Toast from '../components/Toast';
 
 export default function AddPlantModal() {
   const router = useRouter();
+  const theme = useTheme();
   const [name, setName] = useState('');
   const [deviceID, setDeviceId] = useState('');
   const [plantType, setPlantType] = useState('');
@@ -222,13 +221,11 @@ export default function AddPlantModal() {
         >
           Add Plant
         </Button>
-      )}
-    </ScrollView>
+      </ScrollView>
 
-    <Toast visible={toastVisible} message={toastMsg} onHide={() => setToastVisible(false)} />
-  </>
-);
-
+      <Toast visible={toastVisible} message={toastMsg} onHide={() => setToastVisible(false)} />
+    </>
+  );
 }
 
 const styles = StyleSheet.create({

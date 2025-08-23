@@ -52,7 +52,7 @@ export default function CreatePost() {
       }
 
       await axios.post(
-        'https://smart-gardening-functions.azurewebsites.net/api/createCommunityPost',
+        'https://smartgardeningfunctions.azurewebsites.net/api/createCommunityPost',
         { title, plantName, content, visibility, imageBase64 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
