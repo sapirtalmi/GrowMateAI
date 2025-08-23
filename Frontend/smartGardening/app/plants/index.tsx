@@ -8,7 +8,7 @@ import {
   useTheme,
   Button,
 } from 'react-native-paper';
-import { LineChart } from 'react-native-chart-kit';
+//import { LineChart } from 'react-native-chart-kit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';

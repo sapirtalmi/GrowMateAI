@@ -16,7 +16,9 @@ const menuItems = [
   { title: 'Hazards', icon: 'alert-octagon', route: '/hazards' },
   { title: 'Settings', icon: 'cog', route: '/settings' },
   { title: 'Add a GrowMate!', icon: 'wifi-plus', route: 'add-sensor-modal' }, // New menu item
-];
+  { title: 'Profile', icon: 'account', route: '/profile' },
+  { title: 'Weather Forecast', icon: 'weather-sunny', route: '/weather' },];
+
 
 export default function MenuScreen() {
   const router = useRouter();

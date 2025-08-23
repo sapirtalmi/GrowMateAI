@@ -6,6 +6,7 @@ import {
   Button,
   ActivityIndicator,
   useTheme,
+  RadioButton,
 } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
@@ -16,6 +17,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [acceptEmailNotifications, setAcceptEmailNotifications] = useState(false);
+  const [profileType, setProfileType] = useState('amateur'); // default
   const [isLoading, setIsLoading] = useState(false);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [locationPermissionGranted, setLocationPermissionGranted] = useState(false);
@@ -27,7 +29,7 @@ export default function RegisterScreen() {
     setIsRequestingLocation(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (status === 'granted') {
         setLocationPermissionGranted(true);
         const currentLocation = await Location.getCurrentPositionAsync({
@@ -39,9 +41,7 @@ export default function RegisterScreen() {
         Alert.alert(
           'Location Permission',
           'Location access was denied. You can still register, but location features may be limited.',
-          [
-            { text: 'OK', style: 'default' }
-          ]
+          [{ text: 'OK', style: 'default' }]
         );
       }
     } catch (error) {
@@ -68,6 +68,7 @@ export default function RegisterScreen() {
         username,
         password,
         email,
+        profileType,
         acceptEmailNotifications,
       };
 
@@ -125,7 +126,6 @@ export default function RegisterScreen() {
         secureTextEntry
         style={styles.input}
       />
-
       <TextInput
         label="Email Address"
         value={email}
@@ -149,6 +149,19 @@ export default function RegisterScreen() {
         </Text>
       </View>
 
+      <Text variant="labelLarge" style={{ marginTop: 10, marginBottom: 6 }}>
+        Select your profile type:
+      </Text>
+
+      <RadioButton.Group onValueChange={value => setProfileType(value)} value={profileType}>
+        {['amateur', 'enthusiast', 'professional', 'nursery_owner'].map(type => (
+          <View key={type} style={styles.radioRow}>
+            <RadioButton value={type} />
+            <Text>{type.replace('_', ' ')}</Text>
+          </View>
+        ))}
+      </RadioButton.Group>
+
       {/* Location Permission Section */}
       <View style={styles.locationSection}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
@@ -160,12 +173,11 @@ export default function RegisterScreen() {
           />
           <Text style={styles.locationTitle}>Location Access (Optional)</Text>
         </View>
-        
+
         <Text style={styles.locationDescription}>
-          {locationPermissionGranted 
+          {locationPermissionGranted
             ? `✓ Location access granted! Your coordinates will be included.`
-            : 'Allow location access to enable location-based features like nearby garden centers and weather updates.'
-          }
+            : 'Allow location access to enable location-based features like nearby garden centers and weather updates.'}
         </Text>
 
         {!locationPermissionGranted && (
@@ -202,16 +214,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e9ecef'
+    borderColor: '#e9ecef',
   },
   locationTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333'
+    color: '#333',
   },
   locationDescription: {
     fontSize: 14,
     color: '#666',
-    lineHeight: 20
-  }
+    lineHeight: 20,
+  },
+  radioRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
 });
