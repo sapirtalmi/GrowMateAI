@@ -1,17 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter, Link } from 'expo-router';
-import { useState } from 'react';
-import { View, StyleSheet, Image, Alert, ScrollView } from 'react-native';
+
+import { useRouter } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { View, StyleSheet, Alert, ScrollView } from 'react-native';
+import { TextInput, Button, Text, useTheme, ActivityIndicator, Menu } from 'react-native-paper';
 
 import Header from '../components/header';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { TextInput, Button, Text, useTheme, ActivityIndicator } from 'react-native-paper';
 import Toast from '../components/Toast';
 
 export default function AddPlantModal() {
   const router = useRouter();
+  const theme = useTheme();
   const [name, setName] = useState('');
   const [deviceID, setDeviceId] = useState('');
   const [plantType, setPlantType] = useState('');
@@ -19,6 +20,42 @@ export default function AddPlantModal() {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [availableSensors, setAvailableSensors] = useState<string[]>([]);
+  const [sensorsLoading, setSensorsLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  // Fetch available sensors when component mounts
+  useEffect(() => {
+    fetchAvailableSensors();
+  }, []);
+
+  const fetchAvailableSensors = async () => {
+    try {
+      setSensorsLoading(true);
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        Alert.alert("Unauthorized", "No token found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.get(
+        'https://smartgardeningfunctions.azurewebsites.net/api/getMySensors',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.sensorIDs) {
+        setAvailableSensors(response.data.sensorIDs);
+      } else {
+        setAvailableSensors([]);
+      }
+    } catch (error: any) {
+      console.error('Error fetching sensors:', error);
+      Alert.alert('Error', 'Failed to fetch available sensors. Please try again.');
+      setAvailableSensors([]);
+    } finally {
+      setSensorsLoading(false);
+    }
+  };
 
   const pickFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -50,7 +87,11 @@ export default function AddPlantModal() {
 
   const handleAdd = async () => {
     if (!name || !deviceID) {
-      Alert.alert("Missing info", "Please fill in both the name and device ID.");
+      Alert.alert(
+        "Missing Information", 
+        !name ? "Please enter a plant name." : "Please select a device ID from your available sensors."
+      );
+
       return;
     }
     setIsLoading(true);
@@ -100,68 +141,6 @@ export default function AddPlantModal() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Header title="Main Menu" />
-      <Text variant="headlineMedium" style={styles.title}>🌿 Add New Plant</Text>
-
-      <TextInput
-        label="Plant Name"
-        value={name}
-        onChangeText={setName}
-        mode="outlined"
-        style={styles.input}
-        left={<TextInput.Icon icon="leaf" />}
-      />
-
-      <TextInput
-        label="Device ID"
-        value={deviceID}
-        onChangeText={setDeviceId}
-        mode="outlined"
-        style={styles.input}
-        left={<TextInput.Icon icon="access-point" />}
-      />
-
-      <TextInput
-        label="Plant Type (e.g., Herb, Tree)"
-        value={plantType}
-        onChangeText={setPlantType}
-        mode="outlined"
-        style={styles.input}
-        left={<TextInput.Icon icon="flower" />}
-      />
-
-      <Button
-        mode="outlined"
-        onPress={pickFromGallery}
-        icon="image"
-        style={styles.button}
-      >
-        Choose from Gallery
-      </Button>
-
-      <Button
-        mode="outlined"
-        onPress={takePhoto}
-        icon="camera"
-        style={styles.button}
-      >
-        Take a Photo
-      </Button>
-
-      <Button
-        mode="contained"
-        onPress={handleAdd}
-        icon="plus-box"
-        style={{ marginTop: 20 }}
-      >
-        Add Plant
-      </Button>
-
-      {imageUri && <Image source={{ uri: imageUri }} style={styles.preview} />}
-
-    </ScrollView>
-
     <>
       <Toast visible={toastVisible} message={toastMsg} onHide={() => setToastVisible(false)} />
       <ScrollView contentContainerStyle={styles.container}>
@@ -179,14 +158,50 @@ export default function AddPlantModal() {
           left={<TextInput.Icon icon="leaf" />}
         />
 
-        <TextInput
-          label="Device ID"
-          value={deviceID}
-          onChangeText={setDeviceId}
-          mode="outlined"
-          style={styles.input}
-          left={<TextInput.Icon icon="access-point" />}
-        />
+        {/* Device ID Picker */}
+        <View style={styles.pickerContainer}>
+          <Text style={styles.pickerLabel}>Device ID</Text>
+          {sensorsLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={theme.colors.primary} />
+              <Text style={styles.loadingText}>Loading sensors...</Text>
+            </View>
+          ) : availableSensors.length === 0 ? (
+            <View style={styles.noSensorsContainer}>
+              <Text style={styles.noSensorsText}>No sensors available</Text>
+              <Button mode="outlined" onPress={fetchAvailableSensors} style={styles.refreshButton}>
+                Refresh
+              </Button>
+            </View>
+          ) : (
+            <Menu
+              visible={menuVisible}
+              onDismiss={() => setMenuVisible(false)}
+              anchor={
+                <Button
+                  mode="outlined"
+                  onPress={() => setMenuVisible(true)}
+                  style={styles.pickerButton}
+                  contentStyle={styles.pickerButtonContent}
+                  icon="access-point"
+                >
+                  {deviceID || 'Select Device ID'}
+                </Button>
+              }
+            >
+              {availableSensors.map((sensorId) => (
+                <Menu.Item
+                  key={sensorId}
+                  onPress={() => {
+                    setDeviceId(sensorId);
+                    setMenuVisible(false);
+                  }}
+                  title={sensorId}
+                />
+              ))}
+            </Menu>
+          )}
+        </View>
 
         <TextInput
           label="Plant Type (e.g., Herb, Tree)"
@@ -197,43 +212,19 @@ export default function AddPlantModal() {
           left={<TextInput.Icon icon="flower" />}
         />
 
-        <Button
-          mode="outlined"
-          onPress={pickFromGallery}
-          icon="image"
-          style={styles.button}
-        >
-          Choose from Gallery
-        </Button>
 
         <Button
-          mode="outlined"
-          onPress={takePhoto}
-          icon="camera"
-          style={styles.button}
+          mode="contained"
+          onPress={handleAdd}
+          icon="plus-box"
+          style={{ marginTop: 20 }}
         >
-          Take a Photo
+          Add Plant
         </Button>
-
-        {imageUri && (
-          <Image source={{ uri: imageUri }} style={styles.preview} />
-        )}
-
-        {isLoading ? (
-          <ActivityIndicator animating={true} style={{ marginTop: 20 }} color={theme.colors.primary} />
-        ) : (
-          <Button
-            mode="contained"
-            onPress={handleAdd}
-            icon="plus-box"
-            style={styles.button}
-          >
-            Add Plant
-          </Button>
-        )}
       </ScrollView>
-    </>
 
+      <Toast visible={toastVisible} message={toastMsg} onHide={() => setToastVisible(false)} />
+    </>
   );
 }
 
@@ -258,5 +249,48 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 10,
     alignSelf: 'center',
+  },
+  pickerContainer: {
+    marginBottom: 12,
+  },
+  pickerLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+    color: '#333',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 15,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+  },
+  loadingText: {
+    marginLeft: 10,
+    color: '#666',
+  },
+  noSensorsContainer: {
+    padding: 15,
+    backgroundColor: '#fff3cd',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ffeaa7',
+  },
+  noSensorsText: {
+    textAlign: 'center',
+    color: '#856404',
+    marginBottom: 10,
+  },
+  refreshButton: {
+    alignSelf: 'center',
+  },
+  pickerButton: {
+    marginBottom: 8,
+    justifyContent: 'flex-start',
+  },
+  pickerButtonContent: {
+    justifyContent: 'flex-start',
   },
 });
