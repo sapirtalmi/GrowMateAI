@@ -84,6 +84,7 @@ export default function HazardsScreen() {
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState<boolean>(false);
   const [notificationDistance, setNotificationDistance] = useState<number>(10); // Default 10km
   const [isUpdatingNotifications, setIsUpdatingNotifications] = useState<boolean>(false);
+  const [showEmailNotificationModal, setShowEmailNotificationModal] = useState<boolean>(false);
 
   useEffect(() => {
     // Load stored user location when component mounts
@@ -399,57 +400,76 @@ export default function HazardsScreen() {
     <View style={styles.container}>
       <Header title="Hazards" />
       
-      <Text variant="headlineSmall" style={styles.title}>
-        Environmental Hazards Map
-      </Text>
-      
-      {/* Radius Control Slider - Moved to top */}
-      <View style={styles.radiusContainer}>
-        <Text style={styles.radiusTitle}>
-          Filter Radius: {currentRadius}km
-        </Text>
-        <Text style={styles.radiusSubtitle}>
-          Showing {visibleHazards.length} hazards within {currentRadius}km
-        </Text>
-        
-        <View style={styles.sliderContainer}>
-          <Text style={styles.sliderLabel}>1km</Text>
-          <Slider
-            style={styles.slider}
-            minimumValue={0}
-            maximumValue={RADIUS_OPTIONS.length - 1}
-            step={1}
-            value={radiusSliderIndex}
-            onValueChange={handleRadiusChange}
-            minimumTrackTintColor="#388e3c"
-            maximumTrackTintColor="#c8e6c9"
-          />
-          <Text style={styles.sliderLabel}>80km</Text>
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        <View style={styles.titleContainer}>
+          <View style={styles.titleWithIcon}>
+            <Icon name="alert" size={26} color="#4caf50" />
+            <Text variant="headlineSmall" style={styles.title}>
+              Environmental Hazards
+            </Text>
+          </View>
+          <Text style={styles.subtitle}>Monitor and report local garden hazards</Text>
         </View>
         
-        {/* Radius markers */}
-        <View style={styles.radiusMarkersContainer}>
-          {RADIUS_OPTIONS.map((radius, index) => (
-            <TouchableOpacity
-              key={radius}
-              style={[
-                styles.radiusMarker,
-                radiusSliderIndex === index && styles.activeRadiusMarker
-              ]}
-              onPress={() => handleRadiusChange(index)}
-            >
-              <Text
-                style={[
-                  styles.radiusMarkerText,
-                  radiusSliderIndex === index && styles.activeRadiusMarkerText
-                ]}
-              >
-                {radius}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {/* Email Notifications Button */}
+        <TouchableOpacity 
+          style={styles.emailNotificationButton}
+          onPress={() => setShowEmailNotificationModal(true)}
+        >
+          <Icon name="email-alert" size={20} color="#4caf50" />
+        </TouchableOpacity>
       </View>
+      
+      {/* Compact Radius Control */}
+      <Card style={styles.radiusCard}>
+        <Card.Content style={styles.radiusCardContent}>
+          <View style={styles.radiusHeader}>
+            <Text style={styles.radiusTitle}>
+              Filter: {currentRadius}km radius
+            </Text>
+            <Text style={styles.radiusCount}>
+              {visibleHazards.length} hazards
+            </Text>
+          </View>
+          
+          <View style={styles.compactSliderContainer}>
+            <Slider
+              style={styles.compactSlider}
+              minimumValue={0}
+              maximumValue={RADIUS_OPTIONS.length - 1}
+              step={1}
+              value={radiusSliderIndex}
+              onValueChange={handleRadiusChange}
+              minimumTrackTintColor="#4caf50"
+              maximumTrackTintColor="#e8f5e8"
+            />
+          </View>
+          
+          {/* Compact radius options */}
+          <View style={styles.compactRadiusOptions}>
+            {RADIUS_OPTIONS.map((radius, index) => (
+              <TouchableOpacity
+                key={radius}
+                style={[
+                  styles.compactRadiusOption,
+                  radiusSliderIndex === index && styles.activeCompactRadiusOption
+                ]}
+                onPress={() => handleRadiusChange(index)}
+              >
+                <Text
+                  style={[
+                    styles.compactRadiusOptionText,
+                    radiusSliderIndex === index && styles.activeCompactRadiusOptionText
+                  ]}
+                >
+                  {radius}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Card.Content>
+      </Card>
 
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
         <View style={styles.mapContainer}>
@@ -532,7 +552,7 @@ export default function HazardsScreen() {
         {/* Loading overlay */}
         {isLoadingHazards && (
           <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color="#388e3c" />
+            <ActivityIndicator size="large" color="#4caf50" />
             <Text style={styles.loadingText}>Loading hazards...</Text>
           </View>
         )}
@@ -682,71 +702,92 @@ export default function HazardsScreen() {
         </View>
       </Modal>
 
-      {/* Email Notification Settings */}
-      <Card style={styles.notificationCard}>
-        <Card.Content>
-          <View style={styles.notificationHeader}>
-            <Icon name="email-alert" size={24} color="#388e3c" />
-            <Text style={styles.notificationTitle}>Email Notifications</Text>
+      {/* Email Notification Settings Modal */}
+      <Modal
+        visible={showEmailNotificationModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowEmailNotificationModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Email Notification Settings</Text>
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={() => setShowEmailNotificationModal(false)}
+            >
+              <Icon name="close" size={24} color="#666" />
+            </TouchableOpacity>
           </View>
           
-          <View style={styles.notificationToggle}>
-            <Text style={styles.notificationLabel}>
-              Get email notifications for hazards near me
-            </Text>
-            <Switch
-              value={emailNotificationsEnabled}
-              onValueChange={handleEmailNotificationToggle}
-              color="#388e3c"
-              disabled={isUpdatingNotifications}
-            />
-          </View>
-          
-          {emailNotificationsEnabled && (
-            <>
-              <Divider style={styles.notificationDivider} />
-              <View style={styles.distanceSelector}>
-                <Text style={styles.distanceLabel}>
-                  Notification Distance: {notificationDistance}km
-                </Text>
-                <Text style={styles.distanceSubtitle}>
-                  Receive alerts for hazards within this distance
-                </Text>
-                
-                <View style={styles.distanceOptions}>
-                  {RADIUS_OPTIONS.map((distance) => (
-                    <TouchableOpacity
-                      key={distance}
-                      style={[
-                        styles.distanceOption,
-                        notificationDistance === distance && styles.activeDistanceOption
-                      ]}
-                      onPress={() => handleNotificationDistanceChange(distance)}
-                      disabled={isUpdatingNotifications}
-                    >
-                      <Text
-                        style={[
-                          styles.distanceOptionText,
-                          notificationDistance === distance && styles.activeDistanceOptionText
-                        ]}
-                      >
-                        {distance}km
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+          <ScrollView style={styles.modalScrollView} contentContainerStyle={{ padding: 20 }}>
+            <Card style={styles.notificationCard}>
+              <Card.Content>
+                <View style={styles.notificationHeader}>
+                  <Icon name="email-alert" size={24} color="#4caf50" />
+                  <Text style={styles.notificationTitle}>Email Notifications</Text>
                 </View>
                 
-                {isUpdatingNotifications && (
-                  <View style={styles.updatingIndicator}>
-                    <ActivityIndicator size="small" color="#388e3c" />
-                    <Text style={styles.updatingText}>Updating settings...</Text>
-                  </View>
+                <View style={styles.notificationToggle}>
+                  <Text style={styles.notificationLabel}>
+                    Get email notifications for hazards near me
+                  </Text>
+                  <Switch
+                    value={emailNotificationsEnabled}
+                    onValueChange={handleEmailNotificationToggle}
+                    color="#4caf50"
+                    disabled={isUpdatingNotifications}
+                  />
+                </View>
+                
+                {emailNotificationsEnabled && (
+                  <>
+                    <Divider style={styles.notificationDivider} />
+                    <View style={styles.distanceSelector}>
+                      <Text style={styles.distanceLabel}>
+                        Notification Distance: {notificationDistance}km
+                      </Text>
+                      <Text style={styles.distanceSubtitle}>
+                        Receive alerts for hazards within this distance
+                      </Text>
+                      
+                      <View style={styles.distanceOptions}>
+                        {RADIUS_OPTIONS.map((distance) => (
+                          <TouchableOpacity
+                            key={distance}
+                            style={[
+                              styles.distanceOption,
+                              notificationDistance === distance && styles.activeDistanceOption
+                            ]}
+                            onPress={() => handleNotificationDistanceChange(distance)}
+                            disabled={isUpdatingNotifications}
+                          >
+                            <Text
+                              style={[
+                                styles.distanceOptionText,
+                                notificationDistance === distance && styles.activeDistanceOptionText
+                              ]}
+                            >
+                              {distance}km
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                      
+                      {isUpdatingNotifications && (
+                        <View style={styles.updatingIndicator}>
+                          <ActivityIndicator size="small" color="#4caf50" />
+                          <Text style={styles.updatingText}>Updating settings...</Text>
+                        </View>
+                      )}
+                    </View>
+                  </>
                 )}
-              </View>
-            </>
-          )}
-        </Card.Content>
-      </Card>
+              </Card.Content>
+            </Card>
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -754,14 +795,114 @@ export default function HazardsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f6fff6',
+    backgroundColor: '#f8fffe',
+  },
+  
+  // Header Section
+  headerSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#e8e8e8',
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  titleWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   title: {
-    marginVertical: 8,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    color: '#2e7d32',
+    fontWeight: '600',
+    color: '#1a5d1a',
+    letterSpacing: 0.3,
+    fontSize: 22,
+    marginLeft: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '400',
+  },
+  emailNotificationButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#e8f5e8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  
+  // Compact Radius Control
+  radiusCard: {
+    marginHorizontal: 20,
+    marginVertical: 12,
+    backgroundColor: '#ffffff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+  },
+  radiusCardContent: {
+    paddingVertical: 12,
     paddingHorizontal: 16,
+  },
+  radiusHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  radiusTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a5d1a',
+  },
+  radiusCount: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  compactSliderContainer: {
+    marginVertical: 8,
+  },
+  compactSlider: {
+    height: 30,
+  },
+  compactRadiusOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  compactRadiusOption: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#f5f5f5',
+    minWidth: 35,
+    alignItems: 'center',
+  },
+  activeCompactRadiusOption: {
+    backgroundColor: '#4caf50',
+  },
+  compactRadiusOptionText: {
+    fontSize: 10,
+    color: '#666',
+    fontWeight: '500',
+  },
+  activeCompactRadiusOptionText: {
+    color: '#fff',
   },
   // Scroll container styles
   scrollContainer: {
@@ -793,7 +934,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#388e3c',
+    borderColor: '#4caf50',
   },
   infoText: {
     fontSize: 14,
@@ -867,7 +1008,7 @@ const styles = StyleSheet.create({
   },
   selectedHazardOption: {
     backgroundColor: '#e8f5e8',
-    borderColor: '#388e3c',
+    borderColor: '#4caf50',
   },
   hazardIcon: {
     fontSize: 24,
@@ -897,7 +1038,7 @@ const styles = StyleSheet.create({
   uploadButton: {
     marginHorizontal: 16,
     marginBottom: 24,
-    backgroundColor: '#388e3c',
+    backgroundColor: '#4caf50',
   },
   uploadButtonContent: {
     paddingVertical: 8,
@@ -920,7 +1061,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#388e3c',
+    color: '#4caf50',
     fontWeight: '600',
   },
   // Radius control styles
@@ -931,20 +1072,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#388e3c',
-  },
-  radiusTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2e7d32',
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  radiusSubtitle: {
-    fontSize: 12,
-    color: '#388e3c',
-    textAlign: 'center',
-    marginBottom: 12,
+    borderColor: '#4caf50',
   },
   sliderContainer: {
     flexDirection: 'row',
@@ -984,7 +1112,7 @@ const styles = StyleSheet.create({
   },
   radiusMarkerText: {
     fontSize: 12,
-    color: '#388e3c',
+    color: '#4caf50',
     fontWeight: '600',
   },
   activeRadiusMarkerText: {
@@ -1030,7 +1158,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   discussionButton: {
-    backgroundColor: '#388e3c',
+    backgroundColor: '#4caf50',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1061,7 +1189,7 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#e8f5e8',
     borderBottomWidth: 1,
-    borderBottomColor: '#388e3c',
+    borderBottomColor: '#4caf50',
   },
   notificationTitle: {
     fontSize: 18,
@@ -1081,7 +1209,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notificationDivider: {
-    backgroundColor: '#388e3c',
+    backgroundColor: '#4caf50',
     height: 1,
     marginVertical: 8,
   },
@@ -1119,7 +1247,7 @@ const styles = StyleSheet.create({
   },
   distanceOptionText: {
     fontSize: 14,
-    color: '#388e3c',
+    color: '#4caf50',
     fontWeight: '600',
   },
   activeDistanceOptionText: {
@@ -1133,7 +1261,7 @@ const styles = StyleSheet.create({
   updatingText: {
     marginLeft: 8,
     fontSize: 14,
-    color: '#388e3c',
+    color: '#4caf50',
     fontWeight: '600',
   },
 });

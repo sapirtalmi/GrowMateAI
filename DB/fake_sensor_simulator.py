@@ -24,13 +24,13 @@ class SensorSimulator:
         # Base values for realistic sensor readings
         self.base_temp = 22.0  # °C
         self.base_humidity = 60.0  # %
-        #self.base_moisture = 2.5  # 1-4 scale (1=very dry, 4=very wet)
         self.base_moisture = 1  # 1-4 scale (1=very dry, 4=very wet)
+        #self.base_moisture = 1  # 1-4 scale (1=very dry, 4=very wet)
         # Variation ranges
         self.temp_variation = 5.0
         self.humidity_variation = 15.0
-        #self.moisture_variation = 1.0  # ±1 on the 1-4 scale
-        self.moisture_variation = 0  # ±1 on the 1-4 scale
+        self.moisture_variation = 0.5  # ±1 on the 1-4 scale
+        #self.moisture_variation = 0  # ±1 on the 1-4 scale
         
     def generate_reading(self, watering_event=False):
         """Generate a realistic sensor reading"""
