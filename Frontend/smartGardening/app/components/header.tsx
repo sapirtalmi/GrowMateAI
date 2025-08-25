@@ -50,26 +50,40 @@ export default function Header({
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: '#f9fff9',
-    borderBottomColor: '#e0e0e0',
-    borderBottomWidth: 1,
+    backgroundColor: '#ffffff',
   },
   container: {
-    height: 48,
-    paddingHorizontal: 12,
+    height: 44, // Reduced from 56 to 44
+    paddingHorizontal: 12, // Reduced from 16 to 12
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#e8e8e8',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.03, // Reduced shadow
+    shadowRadius: 1,
+    elevation: 1,
   },
   iconWrapper: {
-    width: 40,
+    width: 32, // Reduced from 36 to 32
+    height: 32, // Reduced from 36 to 32
     alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16, // Adjusted for new size
+    backgroundColor: 'transparent',
   },
   title: {
     flex: 1,
     textAlign: 'center',
-    color: '#2e7d32',
-    fontSize: 17,
-    fontWeight: '600',
+    color: '#1a5d1a',
+    fontSize: 17, // Reduced from 18 to 17
+    fontWeight: '600', // Reduced from 700 to 600
+    letterSpacing: 0.3, // Reduced from 0.5 to 0.3
   },
 });

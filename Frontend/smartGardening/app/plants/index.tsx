@@ -8,7 +8,7 @@ import {
   useTheme,
   Button,
 } from 'react-native-paper';
-//import { LineChart } from 'react-native-chart-kit';
+import { LineChart } from 'react-native-chart-kit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -154,56 +154,86 @@ export default function PlantListScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title="Main Menu" />
-      <Text variant="headlineMedium" style={styles.title}>
-        <Icon name="sprout" size={26} /> My Plants
-      </Text>
+      <Header title="My Plants" />
+      <View style={styles.headerSection}>
+        <View style={styles.titleRow}>
+          <View style={styles.titleContainer}>
+            <View style={styles.titleWithIcon}>
+              <Icon name="sprout" size={26} color="#4caf50" />
+              <Text variant="headlineMedium" style={styles.title}>My Plants</Text>
+            </View>
+            <Text style={styles.subtitle}>Manage and monitor your garden</Text>
+          </View>
+        </View>
+      </View>
 
       {plants.length === 0 ? (
-        <Text style={styles.empty}>No plants found.</Text>
+        <View style={styles.emptyContainer}>
+          <Icon name="flower" size={64} color="#c8e6c9" />
+          <Text style={styles.emptyTitle}>No plants yet</Text>
+          <Text style={styles.emptySubtitle}>Start your garden journey by adding your first plant!</Text>
+        </View>
       ) : (
-        <>
+        <View style={styles.plantsContainer}>
           <FlatList
             data={plants}
             keyExtractor={(_, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContainer}
             renderItem={({ item }) => (
-              <TouchableOpacity activeOpacity={0.8} onPress={() => openSensorModal(item)}>
-                <Card style={styles.card} mode="contained">
-                  <Card.Title
-                    title={item.nickname}
-                    subtitle={`Sensor: ${item.sensorID}`}
-                    left={() => (
-                      <View style={styles.iconLeft}>
-                        <Icon name="leaf" size={28} color={theme.colors.primary} />
+              <TouchableOpacity 
+                activeOpacity={0.7} 
+                onPress={() => openSensorModal(item)}
+                style={styles.plantCardWrapper}
+              >
+                <Card style={styles.plantCard} mode="elevated">
+                  <View style={styles.cardHeader}>
+                    <View style={styles.plantIconContainer}>
+                      <Icon name="leaf" size={24} color="#fff" />
+                    </View>
+                    <View style={styles.plantInfo}>
+                      <Text style={styles.plantName}>{item.nickname}</Text>
+                      <Text style={styles.plantType}>{item.plant_type}</Text>
+                      <Text style={styles.sensorId}>Sensor: {item.sensorID}</Text>
+                    </View>
+                    <View style={styles.statusIndicator}>
+                      <Icon 
+                        name={sensorDataMap[item.sensorID] ? "check-circle" : "alert-circle"} 
+                        size={20} 
+                        color={sensorDataMap[item.sensorID] ? "#4caf50" : "#ff9800"} 
+                      />
+                    </View>
+                  </View>
+                  
+                  {sensorDataMap[item.sensorID] && (
+                    <View style={styles.sensorDataContainer}>
+                      <View style={styles.sensorRow}>
+                        <View style={styles.sensorItem}>
+                          <Icon name="thermometer" size={16} color="#ff5722" />
+                          <Text style={styles.sensorLabel}>Temp</Text>
+                          <Text style={styles.sensorValue}>{sensorDataMap[item.sensorID].Temperature}°C</Text>
+                        </View>
+                        <View style={styles.sensorItem}>
+                          <Icon name="water-percent" size={16} color="#2196f3" />
+                          <Text style={styles.sensorLabel}>Humidity</Text>
+                          <Text style={styles.sensorValue}>{sensorDataMap[item.sensorID].Humidity}%</Text>
+                        </View>
+                        <View style={styles.sensorItem}>
+                          <Icon name="water" size={16} color="#4caf50" />
+                          <Text style={styles.sensorLabel}>Soil</Text>
+                          <Text style={styles.sensorValue}>{sensorDataMap[item.sensorID].SoilMoisture}</Text>
+                        </View>
                       </View>
-                    )}
-                  />
-                  <Card.Content>
-                    <Text style={styles.label}>Type: {item.plant_type}</Text>
-                    {sensorDataMap[item.sensorID] && (
-                      <View style={{ marginTop: 10 }}>
-                        <View style={styles.row}>
-                          <Icon name="thermometer" size={20} color="#555" />
-                          <Text> Temp: {sensorDataMap[item.sensorID].Temperature}°C</Text>
-                        </View>
-                        <View style={styles.row}>
-                          <Icon name="water-percent" size={20} color="#555" />
-                          <Text> Humidity: {sensorDataMap[item.sensorID].Humidity}%</Text>
-                        </View>
-                        <View style={styles.row}>
-                          <Icon name="water" size={20} color="#555" />
-                          <Text> Soil: {sensorDataMap[item.sensorID].SoilMoisture}</Text>
-                        </View>
-                      </View>
-                    )}
-                  </Card.Content>
+                    </View>
+                  )}
                 </Card>
               </TouchableOpacity>
             )}
           />
-
-          {/* Sensor Data Modal */}
-          <Modal
+        </View>
+      )}      {/* Sensor Data Modal */}
+      {sensorModal.visible && (
+        <Modal
             visible={sensorModal.visible}
             animationType="fade"
             transparent={true}
@@ -292,15 +322,199 @@ export default function PlantListScreen() {
               </View>
             </View>
           </Modal>
-        </>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f6fff6' },
-  title: { marginBottom: 20, textAlign: 'center' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#f8fffe' 
+  },
+  
+  // Header Section
+  headerSection: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#e8e8e8',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  titleWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  title: { 
+    fontWeight: '600',
+    color: '#1a5d1a',
+    letterSpacing: 0.3,
+    fontSize: 24,
+    marginLeft: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '400',
+  },
+  
+  // Empty State
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1a5d1a',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  
+  // Plants Container
+  plantsContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  listContainer: {
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  
+  // Plant Cards
+  plantCardWrapper: {
+    marginBottom: 16,
+  },
+  plantCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    borderWidth: 0.5,
+    borderColor: '#f0f0f0',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    paddingBottom: 12,
+  },
+  plantIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#4caf50',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  plantInfo: {
+    flex: 1,
+  },
+  plantName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a5d1a',
+    marginBottom: 2,
+  },
+  plantType: {
+    fontSize: 14,
+    color: '#4caf50',
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  sensorId: {
+    fontSize: 12,
+    color: '#888',
+  },
+  statusIndicator: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  // Sensor Data
+  sensorDataContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    borderTopWidth: 0.5,
+    borderTopColor: '#f0f0f0',
+    marginTop: 4,
+  },
+  sensorRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingTop: 12,
+  },
+  sensorItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  sensorLabel: {
+    fontSize: 11,
+    color: '#666',
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  sensorValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a5d1a',
+    marginTop: 2,
+  },
+  
+  // Loading
+  loadingOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 16,
+    marginVertical: 40,
+    marginHorizontal: 20,
+    shadowColor: '#4caf50',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  loadingSpinner: {
+    marginBottom: 18,
+    transform: [{ scale: 1.2 }],
+  },
+  loadingText: {
+    color: '#4caf50',
+    fontWeight: '600',
+    fontSize: 16,
+    letterSpacing: 0.5,
+  },
+  
+  // Legacy styles (keeping for modal compatibility)
   empty: { textAlign: 'center', marginTop: 40, color: '#888' },
   card: { marginBottom: 12, backgroundColor: '#e0ffe0' },
   row: {
@@ -314,28 +528,5 @@ const styles = StyleSheet.create({
   },
   iconLeft: {
     marginRight: 10,
-  },
-  loadingOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 16,
-    marginVertical: 40,
-    shadowColor: '#388e3c',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  loadingSpinner: {
-    marginBottom: 18,
-    transform: [{ scale: 1.2 }],
-  },
-  loadingText: {
-    color: '#388e3c',
-    fontWeight: 'bold',
-    fontSize: 18,
-    letterSpacing: 0.5,
   },
 });

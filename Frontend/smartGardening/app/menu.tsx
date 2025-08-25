@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Modal, TextInput, ActivityIndicator, Alert, TouchableOpacity, Animated, Easing, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Card, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import Header from './components/header';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,8 +13,7 @@ const menuItems = [
   { title: 'My GrowMates', icon: 'access-point', route: '/sensor' },
   { title: 'Diagnose Plant Problem', icon: 'brain', route: '/diagnose' },
   { title: 'Community', icon: 'account-group', route: '/community' },
-  { title: 'Hazards', icon: 'alert-octagon', route: '/hazards' },
-  { title: 'Settings', icon: 'cog', route: '/settings' },
+  { title: 'Hazards', icon: 'alert-octagon', route: '/hazards' } ,
   { title: 'Add a GrowMate!', icon: 'wifi-plus', route: 'add-sensor-modal' }, // New menu item
   { title: 'Profile', icon: 'account', route: '/profile' },
   { title: 'Weather Forecast', icon: 'weather-sunny', route: '/weather' },];
@@ -139,69 +138,96 @@ React.useEffect(() => {
     }
   };
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Header title="Main Menu" />
-      <View style={styles.titleRow}>
-        <Text variant="headlineMedium" style={styles.title}>GrowMateAI Menu</Text>
-
-        {currentWeather && (
-          <View style={styles.weatherBox}>
-            <Image
-              source={{ uri: `https://openweathermap.org/img/wn/${currentWeather.icon}@2x.png` }}
-              style={styles.weatherIcon}
+  const renderMenuItem = ({ item, index }: { item: any; index: number }) => {
+    const isAddSensor = item.route === 'add-sensor-modal';
+    
+    return (
+      <TouchableOpacity
+        style={styles.menuCard}
+        onPress={() => {
+          if (isAddSensor) {
+            setFirstStepVisible(true);
+          } else {
+            router.push(item.route as any);
+          }
+        }}
+        activeOpacity={0.7}
+      >
+        <View style={styles.cardContent}>
+          <View style={styles.iconContainer}>
+            <Icon 
+              name={item.icon} 
+              size={28} 
+              color="#fff" 
             />
-            <View>
-              <Text style={styles.weatherText}>{currentWeather.temp}°C</Text>
-              <Text style={styles.weatherCondition}>{currentWeather.condition}</Text>
-            </View>
           </View>
-        )}
-      </View>
+          <Text style={styles.cardTitle}>{item.title}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
-
-
-      {/* Notifications slot */}
-      <Card style={styles.notificationsCard} onPress={() => setNotificationsVisible(true)}>
-        <Card.Title
-          title={
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.notificationsTitle}>Notifications</Text>
-              <View style={styles.notificationsBadge}>
-                <Text style={styles.notificationsBadgeText}>{notifications.length}</Text>
+  return (
+    <View style={styles.container}>
+      <Header title="Main Menu" />
+      
+      {/* Header Section with Weather */}
+      <View style={styles.headerSection}>
+        <View style={styles.titleRow}>
+          <View style={styles.titleContainer}>
+            <Text variant="headlineMedium" style={styles.title}>
+              Welcome to GrowMate<Text style={styles.aiFont}>AI</Text>
+            </Text>
+          </View>
+          {currentWeather && (
+            <View style={styles.weatherBox}>
+              <Image
+                source={{ uri: `https://openweathermap.org/img/wn/${currentWeather.icon}@2x.png` }}
+                style={styles.weatherIcon}
+              />
+              <View style={styles.weatherInfo}>
+                <Text style={styles.weatherText}>{currentWeather.temp}°</Text>
+                <Text style={styles.weatherCondition}>{currentWeather.condition}</Text>
               </View>
             </View>
-          }
-          left={(props) => <Icon name="bell" size={28} color="#fff" style={{ marginRight: 10 }} />}
-        />
-      </Card>
+          )}
+        </View>
+      </View>
 
-      {/* Other menu items */}
-      {menuItems.map(({ title, icon, route }) => (
-        route === 'add-sensor-modal' ? (
-          <Card
-            key={route}
-            style={styles.card}
-            onPress={() => setFirstStepVisible(true)}
-          >
-            <Card.Title
-              title={title}
-              left={(props) => <Icon name={icon} size={28} color="#388e3c" style={{ marginRight: 10 }} />}
-            />
-          </Card>
-        ) : (
-          <Card
-            key={route}
-            style={styles.card}
-            onPress={() => router.push(route as any)}
-          >
-            <Card.Title
-              title={title}
-              left={(props) => <Icon name={icon} size={28} color="#388e3c" style={{ marginRight: 10 }} />}
-            />
-          </Card>
-        )
-      ))}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Notifications Card */}
+        <TouchableOpacity 
+          style={styles.notificationsCard} 
+          onPress={() => setNotificationsVisible(true)}
+          activeOpacity={0.8}
+        >
+          <View style={styles.notificationContent}>
+            <View style={styles.notificationLeft}>
+              <Icon name="bell" size={28} color="#fff" />
+              <View style={styles.notificationText}>
+                <Text style={styles.notificationsTitle}>Notifications</Text>
+                <Text style={styles.notificationsSubtitle}>Check your garden alerts</Text>
+              </View>
+            </View>
+            <View style={styles.notificationsBadge}>
+              <Text style={styles.notificationsBadgeText}>{notifications.length}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* Menu Grid */}
+        <View style={styles.menuGrid}>
+          {menuItems.map((item, index) => (
+            <View key={`${item.route}-${index}`} style={styles.menuItemContainer}>
+              {renderMenuItem({ item, index })}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
 
       {/* Notifications Modal */}
       <Modal
@@ -379,59 +405,192 @@ React.useEffect(() => {
           </Animated.View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: '#f6fff6',
+    flex: 1,
+    backgroundColor: '#f8fffe',
+  },
+  
+  // Header Section
+  headerSection: {
+    paddingHorizontal: 20,
+    paddingTop: 12, // Reduced from 16 to 12
+    paddingBottom: 12, // Increased from 8 to 12 for balance
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#e8e8e8', // Lighter border
   },
   titleRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  marginVertical: 16,
-  paddingHorizontal: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-
+  titleContainer: {
+    flex: 1,
+    marginRight: 8, // Add space between title and weather
+  },
+  title: {
+    fontWeight: '600', // Reduced from 700 for less boldness
+    color: '#1a5d1a',
+    letterSpacing: 0.3, // Reduced from 0.5
+    fontSize: 24, // Reduced from 28 to fit better
+  },
+  aiFont: {
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    color: '#ff9800',
+    letterSpacing: 1.1,
+  },
+  
+  // Weather
   weatherBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e0f5e9',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginLeft: 8,
+    backgroundColor: '#e8f5e8',
+    borderRadius: 12, // Reduced from 16 for more compact
+    paddingHorizontal: 8, // Reduced from 12
+    paddingVertical: 6, // Reduced from 8
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    minWidth: 80, // Ensure minimum width
   },
-
   weatherIcon: {
-    width: 38,
-    height: 38,
-    marginRight: 8,
+    width: 28, // Reduced from 32
+    height: 28, // Reduced from 32
+    marginRight: 6, // Reduced from 8
   },
-
+  weatherInfo: {
+    alignItems: 'flex-start',
+  },
   weatherText: {
-    fontSize: 16,
+    fontSize: 14, // Reduced from 16
     fontWeight: 'bold',
-    color: '#2e7d32',
+    color: '#1a5d1a',
+    lineHeight: 16,
   },
-
   weatherCondition: {
-    fontSize: 12,
+    fontSize: 10, // Reduced from 12
     color: '#4caf50',
+    lineHeight: 12,
   },
-
-  title: {
-    marginVertical: 16,
-    textAlign: 'center',
+  
+  // Scroll
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingTop: 16,
+    paddingBottom: 32, // Add more bottom padding for better scrolling
+  },
+  
+  // Notifications Card
+  notificationsCard: {
+    backgroundColor: '#4caf50',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  notificationContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  notificationLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  notificationText: {
+    marginLeft: 16,
+  },
+  notificationsTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  notificationsSubtitle: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    marginTop: 2,
+  },
+  notificationsBadge: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  notificationsBadgeText: {
+    color: '#4caf50',
     fontWeight: 'bold',
+    fontSize: 12,
   },
-  card: {
-    marginBottom: 12,
-    backgroundColor: '#e0f5e9', 
+  
+  // Menu Grid
+  menuGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  menuItemContainer: {
+    width: '48%', // Each item takes roughly half the width
+    marginBottom: 12, // Spacing between rows
+  },
+  menuCard: {
+    backgroundColor: '#fafafa', // Light gray background for modern look
+    borderRadius: 16, // Slightly smaller radius for modern look
+    padding: 16, // Reduced padding for more compact cards
+    elevation: 2, // Reduced elevation for subtle shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    minHeight: 110, // Slightly reduced height
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 0.5,
+    borderColor: '#f0f0f0',
+  },
+  cardContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    width: 48, // Reduced from 56 to 48
+    height: 48, // Reduced from 56 to 48
+    borderRadius: 24, // Adjusted for new size
+    backgroundColor: '#4caf50',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8, // Reduced from 12 to 8
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+  },
+  cardTitle: {
+    fontSize: 13, // Slightly reduced for better fit
+    fontWeight: '600',
+    color: '#1a5d1a',
+    textAlign: 'center',
+    lineHeight: 16,
+    paddingHorizontal: 4, // Add some padding to prevent text cutoff
   },
   modalOverlay: {
     flex: 1,
@@ -504,104 +663,61 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 12,
   },
-  // Add styles for notifications
-  notificationsCard: {
-    marginBottom: 16,
-    backgroundColor: '#388e3c',
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: '#fff176',
-    elevation: 4,
-  },
-  notificationsTitle: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 20,
-    letterSpacing: 0.5,
-  },
+  
+  // Notifications Modal Styles
   notificationsOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   notificationsModal: {
     width: '85%',
-    backgroundColor: '#fffde7',
-    borderRadius: 18,
+    backgroundColor: '#fff',
+    borderRadius: 16,
     padding: 24,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    maxHeight: '70%',
     elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
   notificationsModalTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#388e3c',
-    marginBottom: 18,
+    fontWeight: '700',
+    color: '#1a5d1a',
+    textAlign: 'center',
+    marginBottom: 20,
   },
-  notificationText: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 10,
-    paddingLeft: 4,
+  notificationBox: {
+    backgroundColor: '#f1f8e9',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50',
+  },
+  notificationBoxText: {
+    fontSize: 15,
+    color: '#2e7d32',
+    lineHeight: 20,
   },
   notificationsCloseButton: {
-    marginTop: 18,
-    backgroundColor: '#388e3c',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 32,
+    backgroundColor: '#4caf50',
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   notificationsCloseButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  // Add styles for the badge
-  notificationsBadge: {
-    marginLeft: 10,
-    backgroundColor: '#fff176',
-    borderRadius: 10,
-    minWidth: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  notificationsBadgeText: {
-    color: '#388e3c',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  notificationBox: {
-    backgroundColor: '#e0f5e9',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#388e3c',
-    shadowColor: '#388e3c',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 3,
-    elevation: 2,
-    width: '100%',
-  },
-  notificationBoxText: {
-    color: '#2e7d32',
     fontSize: 16,
     fontWeight: '600',
-    letterSpacing: 0.1,
-  },
-  aiFont: {
-    fontFamily: 'System', // fallback if custom font not available
-    fontStyle: 'italic',
-    fontWeight: 'bold',
-    color: '#ff9800', // orange for AI
-    letterSpacing: 1.1,
+    textAlign: 'center',
   },
 });

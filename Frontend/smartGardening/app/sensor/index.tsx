@@ -52,7 +52,7 @@ export default function SensorDataScreen() {
   const renderSensorCard = ({ item, index }: { item: string; index: number }) => {
     const sensorTypes = ['Temperature', 'Humidity', 'Soil Moisture', 'Light', 'pH Level'];
     const randomType = sensorTypes[index % sensorTypes.length];
-    const isOnline = Math.random() > 0.3; // Mock online status
+    const isOnline = true; // All sensors are online
     
     return (
       <Card style={[styles.sensorCard, { backgroundColor: theme.colors.surface }]} mode="outlined">
@@ -101,25 +101,6 @@ export default function SensorDataScreen() {
                 Battery: {Math.floor(Math.random() * 40) + 60}%
               </Text>
             </View>
-          </View>
-          
-          <View style={styles.cardActions}>
-            <Button 
-              mode="outlined" 
-              compact
-              onPress={() => console.log('View details:', item)}
-              style={styles.actionButton}
-            >
-              View Details
-            </Button>
-            <Button 
-              mode="contained" 
-              compact
-              onPress={() => console.log('Configure:', item)}
-              style={styles.actionButton}
-            >
-              Configure
-            </Button>
           </View>
         </Card.Content>
       </Card>
@@ -378,15 +359,5 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     color: '#666',
     fontSize: 13,
-  },
-  
-  // Card Actions
-  cardActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
   },
 });
