@@ -1,33 +1,18 @@
-# Smart-Gardening
-IOT Project
+# 🌿 GrowMateAI – AI-Powered Smart Gardening System
 
+**GrowMateAI** is an end-to-end smart gardening solution that combines **IoT hardware**, **cloud-based serverless architecture**, and **AI-powered analytics** to help users monitor, diagnose, and optimize their home or commercial gardens.
 
-python3.10 -m venv .venv
-source .venv/bin/activate
-func azure functionapp publish smart-gardening-functions --python --verbose
-# 🌱 GrowMateAI – Cultivate Your Smart Garden
+This project leverages custom-built **ESP32-C3** sensors, a **React Native mobile app**, and a **Python backend hosted on Azure Functions** to deliver personalized, real-time plant care recommendations and automate garden management.
 
-GrowMateAI is an AI-powered smart gardening assistant that helps users monitor plant health, detect problems early, and optimize care. Built with **React Native**, **Azure Functions**, and **ESP32 IoT sensors**, it enables real-time insights and automated gardening assistance—anytime, anywhere.
-
-🔗 [Project Website](https://michaeljornist.github.io/GrowMatePage/)
+🔗 [Live Project Page](https://michaeljornist.github.io/GrowMatePage/)
 
 ---
 
-## 🌟 Key Highlights
+## 🧠 Project Vision
 
-- 🧠 **AI Plant Diagnosis** – ChatGPT-powered analysis and care suggestions  
-- 📡 **ESP32 Integration** – Live environmental monitoring with custom sensors  
-- 🌿 **Smart Garden Assistant** – Plan, monitor, and optimize your plants  
-- 📱 **Mobile-First Design** – Cross-platform app using Expo + React Native  
-- ☁️ **Serverless Backend** – Python Azure Functions powering real-time APIs  
-- 🌐 **Community Hub** – Share garden posts, ask questions, and collaborate
+Traditional gardening often relies on trial and error—figuring out when to water, what conditions plants thrive in, and how to detect problems early. GrowMateAI eliminates this guesswork by providing **data-driven**, **AI-enhanced**, and **sensor-powered** gardening assistance to users of all skill levels.
 
 ---
 
-## 📱 Frontend – React Native (Expo)
+## 🧩 Architecture Overview
 
-### 🔧 Setup Instructions
-
-```bash
-npm install
-npx expo start
