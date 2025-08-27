@@ -45,7 +45,9 @@ Each function is a microservice:
 - `getSensorHistory/`, `getWeatherForecast/` – Historical/environmental data  
 - `register/`, `login/`, `getUserProfile/` – Auth & user management  
 - `createCommunityPost/`, `voteContent/` – Garden community interactions  
-- `sendHazardMessage/` – Real-time hazard alerts  
+- `sendHazardMessage/` – Real-time hazard alerts
+
+  *(This is a high-level overview — not all functions are listed here. See the backend source code for the complete set.)*
 
 ---
 
