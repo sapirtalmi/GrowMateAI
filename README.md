@@ -3,7 +3,6 @@
 
 Built with custom **ESP32-C3** sensors, a **React Native mobile app**, and a **Python backend on Azure Functions**, GrowMateAI delivers real-time insights and intelligent automation for plant care.
 
-🔗 [Live Project Page](https://michaeljornist.github.io/GrowMatePage/)
 
 ---
 
