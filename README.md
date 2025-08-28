@@ -4,7 +4,7 @@ GrowMateAI is an end-to-end smart gardening solution that combines IoT hardware,
 
 Built with custom ESP32-C3 sensors, a React Native mobile app, and a Python backend on Azure Functions, GrowMateAI delivers real-time insights and intelligent automation for plant care.
 
-[Website](https://sapirtalmi.github.io/GrowMateAI/#home)
+[Check out our website for more details!](https://sapirtalmi.github.io/GrowMateAI/#home)
 
 ---
 
