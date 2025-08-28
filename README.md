@@ -1,52 +1,152 @@
-# GrowMateAI 
-**GrowMateAI** is an end-to-end smart gardening solution combining **IoT hardware**, **cloud-based serverless architecture**, and **AI analytics** to monitor, diagnose, and optimize home or commercial gardens.
+# GrowMateAI
 
-Built with custom **ESP32-C3** sensors, a **React Native mobile app**, and a **Python backend on Azure Functions**, GrowMateAI delivers real-time insights and intelligent automation for plant care.
+GrowMateAI is an end-to-end smart gardening solution that combines IoT hardware, cloud-based serverless architecture, and AI analytics to monitor, diagnose, and optimize home or commercial gardens.
 
-Check out our website: https://sapirtalmi.github.io/GrowMateAI/#home
+Built with custom ESP32-C3 sensors, a React Native mobile app, and a Python backend on Azure Functions, GrowMateAI delivers real-time insights and intelligent automation for plant care.
+
+[Website](https://sapirtalmi.github.io/GrowMateAI/#home)
+
 ---
 
 ## Project Vision
 
-Traditional gardening often relies on trial and error—when to water, how to identify stress, or which plants thrive where. **GrowMateAI** eliminates the guesswork using **sensor data**, **AI-powered diagnosis**, and **community-driven learning** to assist all types of gardeners.
+Traditional gardening often relies on trial and error—when to water, how to identify stress, or which plants thrive where. GrowMateAI eliminates the guesswork using sensor data, AI-powered diagnosis, and community-driven learning to assist all types of gardeners.
 
 ---
 
 ## Architecture Overview
 
-| Layer        | Technology Stack                                          |
-|--------------|-----------------------------------------------------------|
-| IoT       | ESP32-C3 + DHT22 + Soil Moisture + Light Sensors          |
-| Backend   | Azure Functions (Python), OpenAI API                      |
-| Frontend  | React Native (Expo), React Hooks, `react-native-paper`    |
+| Layer    | Technology Stack                                      |
+|----------|-------------------------------------------------------|
+| IoT      | ESP32-C3, DHT22, Soil Moisture, Light Sensors         |
+| Backend  | Azure Functions (Python), OpenAI API                  |
+| Frontend | React Native (Expo), React Hooks, react-native-paper  |
+
+---
+## FrontendProviders
+
+This folder contains the frontend for the GrowMate Providers Control Dashboard.
+
+### Purpose
+The dashboard allows providers to manage users, hazards, sensors, and plants in the GrowMate system.
+
+### Features
+- User management (view, update, delete users)
+- Hazard monitoring and control
+- Sensor management and visualization (including map view)
+- Authentication and secure access
+
+### Tech Stack
+- React
+- Leaflet (for maps)
+- Axios (API requests)
+- React Router
+
+### Quick Start
+Run `start.sh` in the `FrontendProviders` directory to check Node.js requirements and install dependencies:
+
+```bash
+cd FrontendProviders
+./start.sh
+```
+
+### Structure
+- `src/components/`: Reusable UI components (Navbar, HazardsMap, etc.)
+- `src/pages/`: Main dashboard pages (Dashboard, UsersPage, HazardsPage, SensorsPage, LoginPage)
+- `src/services/api.js`: API configuration and request logic
 
 ---
 
+## ESP32
+
+This folder contains code for ESP32-based sensor devices and simulation scripts.
+
+### Purpose
+- Simulate and operate sensor devices that send data to the GrowMate backend.
+
+### Files
+- `esp32_mock.py`: Python script to simulate sensor data and send it to the backend API. Supports timed and manual modes.
+- `Sensor.ino`: Arduino firmware for ESP32 devices. Handles WiFi setup, sensor readings (moisture, temperature, humidity), and HTTP communication with the backend.
+
+### Usage
+- Use `esp32_mock.py` for local testing and simulation of sensor data.
+- Flash `Sensor.ino` to an ESP32 device for real sensor operation.
+
+---
+
+src/              # Shared components, hooks, styles, utils
 ## Project Structure
 
-### 📱 Frontend – *React Native (Expo)*
+### 📱 Frontend – React Native (Expo)
 
-
-<summary>📁 Folder Structure</summary>
-
+**Folder Structure:**
 ```bash
-app/              # Navigation and screen components  
-assets/           # Static assets like icons and images  
-services/         # API calls and external integrations  
-src/              # Shared components, hooks, styles, utils
- ```
+app/        # Navigation and screen components
+assets/     # Static assets like icons and images
+services/   # API calls and external integrations
+src/        # Shared components, hooks, styles, utils
+```
 
-### Backend – *Azure Functions*
+### Backend – Azure Functions
 
 Each function is a microservice:
-- `ingestSensorData/` – Collect & store sensor readings  
-- `diagnoseSignalR/` – AI-powered plant diagnosis  
-- `getSensorHistory/`, `getWeatherForecast/` – Historical/environmental data  
-- `register/`, `login/`, `getUserProfile/` – Auth & user management  
-- `createCommunityPost/`, `voteContent/` – Garden community interactions  
+- `ingestSensorData/` – Collect & store sensor readings
+- `diagnoseSignalR/` – AI-powered plant diagnosis
+- `getSensorHistory/`, `getWeatherForecast/` – Historical/environmental data
+- `register/`, `login/`, `getUserProfile/` – Auth & user management
+- `createCommunityPost/`, `voteContent/` – Garden community interactions
 - `sendHazardMessage/` – Real-time hazard alerts
 
-  *(This is a high-level overview — not all functions are listed here. See the backend source code for the complete set.)*
+*This is a high-level overview — not all functions are listed here. See the backend source code for the complete set.*
+
+---
+## FrontendProviders
+
+This folder contains the frontend for the GrowMate Providers Control Dashboard.
+
+### Purpose
+The dashboard enables providers to manage users, hazards, sensors, and plants in the GrowMate system.
+
+### Features
+- User management (view, update, delete users)
+- Hazard monitoring and control
+- Sensor management and visualization (including map view)
+- Authentication and secure access
+
+### Tech Stack
+- React
+- Leaflet (maps)
+- Axios (API requests)
+- React Router
+
+### Quick Start
+To set up, run `start.sh` in the `FrontendProviders` directory. This checks Node.js requirements and installs dependencies:
+
+```bash
+cd FrontendProviders
+./start.sh
+```
+
+### Structure
+- `src/components/`: Reusable UI components (Navbar, HazardsMap, etc.)
+- `src/pages/`: Main dashboard pages (Dashboard, UsersPage, HazardsPage, SensorsPage, LoginPage)
+- `src/services/api.js`: API configuration and request logic
+
+---
+## ESP32
+
+This folder contains code for ESP32-based sensor devices and simulation scripts.
+
+### Purpose
+Simulate and operate sensor devices that send data to the GrowMate backend.
+
+### Files
+- `esp32_mock.py`: Python script to simulate sensor data and send it to the backend API. Supports timed and manual modes.
+- `Sensor.ino`: Arduino firmware for ESP32 devices. Handles WiFi setup, sensor readings (moisture, temperature, humidity), and HTTP communication with the backend.
+
+### Usage
+- Use `esp32_mock.py` for local testing and simulation of sensor data.
+- Flash `Sensor.ino` to an ESP32 device for real sensor operation.
 
 ---
 
