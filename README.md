@@ -50,20 +50,31 @@ Each function is a microservice:
 
 ---
 
-## ESP32
+## ESP32 Sensor System
 
-This folder contains code for ESP32-based sensor devices and simulation scripts.
+This folder contains code for ESP32-C3 based sensor devices and simulation scripts.
 
 ### Purpose
-Simulate and operate sensor devices that send data to the GrowMate backend.
+Simulate and operate sensor devices that send data to the GrowMate backend using real hardware or mock data.
+
+### Hardware Components
+- **ESP32-C3**: Main microcontroller
+- **DHT22**: Temperature & humidity sensor
+- **Soil Moisture Sensor**: Measures soil moisture levels
+- **Light Intensity Sensor**: Monitors ambient light conditions
 
 ### Files
 - `esp32_mock.py`: Python script to simulate sensor data and send it to the backend API. Supports timed and manual modes.
 - `Sensor.ino`: Arduino firmware for ESP32 devices. Handles WiFi setup, sensor readings (moisture, temperature, humidity), and HTTP communication with the backend.
 
 ### Usage
-- Use `esp32_mock.py` for local testing and simulation of sensor data.
-- Flash `Sensor.ino` to an ESP32 device for real sensor operation.
+- Use `esp32_mock.py` for local testing and simulation of sensor data
+- Flash `Sensor.ino` to an ESP32 device for real sensor operation
+
+### Connectivity
+- Sends data via HTTP to Azure Functions
+- Optional MQTT support for real-time streaming
+- Battery-efficient design for continuous deployment
 
 ---
 
@@ -164,19 +175,5 @@ GrowMateAI uses ChatGPT for:
 - Plant disease and stress diagnosis
 
 Making expert gardening advice accessible to everyone.
-
----
-
-## ESP32-C3 Sensor System
-
-### Hardware
-- Soil Moisture Sensor
-- DHT22 (Temperature & Humidity)
-- Light Intensity Sensor
-
-### Connectivity
-- Sends data via HTTP to Azure Functions
-- Optional MQTT support for real-time streaming
-- Battery-efficient for continuous deployment
 
 
