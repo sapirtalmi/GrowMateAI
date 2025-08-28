@@ -1,0 +1,24 @@
+{
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": ["post", "options"],
+      "route": "sendhazardmessage"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    },
+    {
+      "type": "signalR",
+      "direction": "out",
+      "name": "signalRMessages",
+      "hubName": "gardeningHub",
+      "connectionStringSetting": "AzureSignalRConnectionString"
+    }
+  ]
+}
