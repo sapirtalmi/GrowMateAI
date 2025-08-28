@@ -23,39 +23,6 @@ Traditional gardening often relies on trial and error—when to water, how to id
 | Frontend | React Native (Expo), React Hooks, react-native-paper  |
 
 ---
-## FrontendProviders
-
-This folder contains the frontend for the GrowMate Providers Control Dashboard.
-
-### Purpose
-The dashboard allows providers to manage users, hazards, sensors, and plants in the GrowMate system.
-
-### Features
-- User management (view, update, delete users)
-- Hazard monitoring and control
-- Sensor management and visualization (including map view)
-- Authentication and secure access
-
-### Tech Stack
-- React
-- Leaflet (for maps)
-- Axios (API requests)
-- React Router
-
-### Quick Start
-Run `start.sh` in the `FrontendProviders` directory to check Node.js requirements and install dependencies:
-
-```bash
-cd FrontendProviders
-./start.sh
-```
-
-### Structure
-- `src/components/`: Reusable UI components (Navbar, HazardsMap, etc.)
-- `src/pages/`: Main dashboard pages (Dashboard, UsersPage, HazardsPage, SensorsPage, LoginPage)
-- `src/services/api.js`: API configuration and request logic
-
----
 
 ## ESP32
 
@@ -74,8 +41,7 @@ This folder contains code for ESP32-based sensor devices and simulation scripts.
 
 ---
 
-src/              # Shared components, hooks, styles, utils
-## Project Structure
+## App Structure
 
 ### 📱 Frontend – React Native (Expo)
 
@@ -98,6 +64,22 @@ Each function is a microservice:
 - `sendHazardMessage/` – Real-time hazard alerts
 
 *This is a high-level overview — not all functions are listed here. See the backend source code for the complete set.*
+
+---
+## ESP32
+
+This folder contains code for ESP32-based sensor devices and simulation scripts.
+
+### Purpose
+Simulate and operate sensor devices that send data to the GrowMate backend.
+
+### Files
+- `esp32_mock.py`: Python script to simulate sensor data and send it to the backend API. Supports timed and manual modes.
+- `Sensor.ino`: Arduino firmware for ESP32 devices. Handles WiFi setup, sensor readings (moisture, temperature, humidity), and HTTP communication with the backend.
+
+### Usage
+- Use `esp32_mock.py` for local testing and simulation of sensor data.
+- Flash `Sensor.ino` to an ESP32 device for real sensor operation.
 
 ---
 ## FrontendProviders
@@ -131,22 +113,6 @@ cd FrontendProviders
 - `src/components/`: Reusable UI components (Navbar, HazardsMap, etc.)
 - `src/pages/`: Main dashboard pages (Dashboard, UsersPage, HazardsPage, SensorsPage, LoginPage)
 - `src/services/api.js`: API configuration and request logic
-
----
-## ESP32
-
-This folder contains code for ESP32-based sensor devices and simulation scripts.
-
-### Purpose
-Simulate and operate sensor devices that send data to the GrowMate backend.
-
-### Files
-- `esp32_mock.py`: Python script to simulate sensor data and send it to the backend API. Supports timed and manual modes.
-- `Sensor.ino`: Arduino firmware for ESP32 devices. Handles WiFi setup, sensor readings (moisture, temperature, humidity), and HTTP communication with the backend.
-
-### Usage
-- Use `esp32_mock.py` for local testing and simulation of sensor data.
-- Flash `Sensor.ino` to an ESP32 device for real sensor operation.
 
 ---
 
